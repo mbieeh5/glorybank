@@ -25,9 +25,11 @@ export interface StateReminingBalance {
     SaldoBca: number,
     SaldoBri: number,
     SaldoDanamon: number,
+    SaldoFreeDanamon: number,
 }
 
 export const initialStateReminingBalance:StateReminingBalance = {
+    SaldoFreeDanamon : 0,
     SaldoBca: 0,
     SaldoBri: 0,
     SaldoDanamon: 0
@@ -37,4 +39,5 @@ export type ActionReminingBalance =
 | {type: "SET_SALDO_BCA"; payload: number}
 | {type: "SET_SALDO_BRI"; payload: number}
 | {type: "SET_SALDO_DANAMON"; payload: number}
+| {type: "SET_FREE_DANAMON"; payload: number}
 

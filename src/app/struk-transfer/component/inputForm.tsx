@@ -1,6 +1,8 @@
 'use client'
 import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation';
+import { DB } from '../../../../firebase-config';
+import { get, push, ref, runTransaction, set } from 'firebase/database';
 
 
 export default function InputForm() {
@@ -89,7 +91,51 @@ export default function InputForm() {
           admin,
           totalbyr,
       };
-      console.log(dataStruk)
+
+      const dataUser = {
+        bank, 
+        norek,
+        penerima
+      }
+
+      const bankBCA = bank.match(/BCA(?!.*DIGITAL)/i) ? "BCA" : null;
+      const bankBRI = bank.match(/BRI/i) ? "BRI" : null;
+      const bankDanamon = bank ? "DANAMON" : null;
+      const sanitizerBank = bankBCA || bankBRI || bankDanamon;
+      
+      if (sanitizerBank === "DANAMON") {
+        const sisaFreeRef = ref(DB, 'Datas/SisaFree/ValueFreeDanamon');
+        const sisaSaldoDanamon = ref(DB, 'Datas/SaldoAwal/ValueDanamon');
+
+        const sisaFreeSnapshot = await get(sisaFreeRef)
+        const sisaFreeValue = sisaFreeSnapshot.val();
+
+        runTransaction(sisaSaldoDanamon, (currentSaldo) => {
+          set(sisaFreeRef, sisaFreeValue - 1);
+            return currentSaldo - parseInt(nominal.replace(/\./g, ''));
+        })
+      }
+      if (sanitizerBank === "BCA") {
+        const sisaSaldoDanamon = ref(DB, 'Datas/SaldoAwal/ValueBca');
+
+        runTransaction(sisaSaldoDanamon, (currentSaldo) => {
+            return currentSaldo - parseInt(nominal.replace(/\./g, ''));
+        })
+      }
+      if (sanitizerBank === "BRI") {
+        const sisaSaldoDanamon = ref(DB, 'Datas/SaldoAwal/ValueBri');
+
+        runTransaction(sisaSaldoDanamon, (currentSaldo) => {
+            return currentSaldo - parseInt(nominal.replace(/\./g, ''));
+        })
+      }
+
+      const DataUsers = ref(DB, `Datas/UserInfo/`);
+      const DataMutasi = ref(DB, `Mutasi/${lokasi}/${sanitizerBank}/`);
+
+      await push(DataMutasi, dataStruk);
+      await push(DataUsers, dataUser)
+
       sessionStorage.setItem('strukData', JSON.stringify(dataStruk));
       router.push('/struk-transfer/cetak');
     };
