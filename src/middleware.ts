@@ -22,6 +22,7 @@ async function validateToken(token: string): Promise<JWTPayload | null> {
 
 export async function middleware(request: NextRequest) {
     const currentPath = request.nextUrl.pathname;
+
     const protectedRoute = [
         '/',
         '/data-transfer',

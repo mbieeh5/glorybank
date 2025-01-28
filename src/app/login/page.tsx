@@ -37,16 +37,15 @@ async function handleLogin(){
                     })
                 }).then((res) => {
                     if(res.status === 200){
-                      setTimeout(() => {
                         Swal.fire({
                           icon: 'success',
                           title: "Login Success",
                           text: "Welcome Aboard",
                           timer: 2000,
-                        });
-                        router.push('/')
-                        setIsLoading(false)
-                      },3000)
+                          showConfirmButton: false,
+                        }).then(() => {
+                          router.push('/')
+                        })
                     }else {
                         Swal.fire({
                             icon: 'error',
@@ -56,6 +55,7 @@ async function handleLogin(){
                         })
                         setIsLoading(false)
                     }
+                  setIsLoading(false)
                 })
             }else {
                 Swal.fire({
@@ -65,11 +65,11 @@ async function handleLogin(){
                 })
                 setIsLoading(false)
             }
-        }).catch((err) => {
+        }).catch(() => {
             Swal.fire({
               icon: "error",
               title: "Wrong Username & Password",
-              text: `${err}` 
+              text: `Please check your username and password and try again.` 
             })
             setIsLoading(false)
         })

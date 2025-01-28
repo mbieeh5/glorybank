@@ -1,8 +1,22 @@
+"use client";
 import GradientTextDefault from "@/components/GradientTextDefault";
 import ReminingBalance from "@/components/ReminingBalance";
 import React from "react";
 
 export default function Home() {
+
+  const doAlogot = () => {
+    fetch('/api/logout', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    }).then(() => {
+      window.location.reload();
+    })
+  }
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen py-2">
       <main className="flex flex-col items-center justify-center w-full flex-1 px-20 text-center">
@@ -33,6 +47,9 @@ export default function Home() {
               Admin only.
             </p>
           </a>
+          <button onClick={() => {doAlogot()}} className="p-6 mt-6 text-left border w-96 rounded-xl hover:text-blue-600 focus:text-blue-600">
+            <h3 className="text-2xl font-bold">&larr; Logout </h3>
+          </button>
         </div>
       </main>
     </div>
