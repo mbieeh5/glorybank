@@ -15,12 +15,25 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { NavItems } from '@/lib/NavItems'
 import GradientText from './GradientTextDefault'
+import GradientTextDefault from './GradientTextDefault'
 
 export default function Navbar() {
   const pathname = usePathname()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
   
+  const doAlogot = () => {
+    fetch('/api/logout', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    }).then(() => {
+      window.location.reload();
+    })
+  }
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm dark:bg-gray-900">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
@@ -55,6 +68,11 @@ export default function Navbar() {
                 </Link>
               </NavigationMenuItem>
             ))}
+            <NavigationMenuItem onClick={() => {doAlogot()}}><GradientTextDefault
+                                colors={["#1a1a1a", "#4079ff", "#1a1a1a", "#4079ff", "#1a1a1a"]}
+                                animationSpeed={3}
+                                showBorder={false}
+                                className="p-3">Logout</GradientTextDefault></NavigationMenuItem>
           </NavigationMenuList>
         </NavigationMenu>
 
@@ -76,6 +94,13 @@ export default function Navbar() {
                   {item.label}
                 </Link>
               ))}
+              <NavigationMenuItem onClick={() => {doAlogot()}}>
+              <GradientTextDefault
+                                colors={["#1a1a1a", "#4079ff", "#1a1a1a", "#4079ff", "#1a1a1a"]}
+                                animationSpeed={3}
+                                showBorder={false}
+                                className="p-3">Logout</GradientTextDefault>
+              </NavigationMenuItem>
             </div>
           </div>
         )}

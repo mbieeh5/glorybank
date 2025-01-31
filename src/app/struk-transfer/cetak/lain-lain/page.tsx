@@ -7,6 +7,8 @@ interface dataStrukLainLain {
     nomorTujuan: string,
     nominal : string,
     admin: string, 
+    tipeStruk: string;
+    lokasi: string,
     totalbyr: string,
     SN: string,
 }
@@ -56,7 +58,9 @@ export default function CetakStruk() {
         }
     };
     
-    
+    const regexTheTipeStruk = (type: string) => {
+        return type.split(" ")[0];
+    }
 
     const handleBack = () => {
         Router.push('/struk-transfer')
@@ -86,14 +90,33 @@ export default function CetakStruk() {
             {data.length > 0 ? (
                 data.map((a, i) => (
                     <div key={i} className="grid justify-items-center">
+                        {a.lokasi === "Cikaret" ? 
+                        <>
+                            <p className="text-l font-bold tracking-tight text-gray-900 sm:text-l">Glory Cell</p>
+                            <p className=" text-xs leading-3 text-gray-600">
+                                JLN. RAYA CIKARET NO 002B
+                            </p>
+                            <p className=" text-xs text-gray-600">
+                                CIBINONG - BOGOR
+                            </p>
+                            <p className=" text-xs leading-1 text-gray-600 border-b border-gray-900">
+                                {a.tanggal}
+                            </p>
+                        </>
+                        : <>
                             <p className="text-l font-bold tracking-tight text-gray-900 sm:text-l ">Glory Cell</p>
+                            <p className=" text-xs leading-3 text-gray-600">
+                                JLN. RAYA SUKAHATI NO 01
+                            </p>
                             <p className=" text-xs text-gray-600">
                                 CIBINONG - BOGOR
                             </p>
                             <p className=" text-xs leading-1 text-gray-600 border-b border-gray-600">
                                 {a.tanggal}
                             </p>
-                        <h2 className="mt-0 text-s font-italic tracking-tight text-gray-900 sm:text-1xl">Top Up Lain Lain</h2>
+                        </>
+                        }
+                        <h2 className="mt-0 text-s font-italic tracking-tight text-gray-900 sm:text-1xl">Top Up {regexTheTipeStruk(a.tipeStruk)}</h2>
                         <div className="grid grid-cols-1 sm:grid-cols-1 gap-0">
                                 {/* Nomor Tujuan */}
                                 <div className="flex items-center text-gray-700 font-medium text-sm">
@@ -144,7 +167,7 @@ export default function CetakStruk() {
                         <div className="flex flex-col text-center text-gray-700 font-medium">
                             <span className="font-normal">TERIMA KASIH</span>
                             <span className="font-normal">
-                            CS-WA: 08973997575
+                            {a.lokasi === "Cikaret" ? "CS-WA: 08811429638" : "CS-WA: 08973997575"}
                             </span>
                         </div>
                     </div>

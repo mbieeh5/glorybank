@@ -34,28 +34,28 @@ export default function ReminingBalance() {
     }, []);
 
     return (
-        <div className="flex flex-col items-center pt-12">
+        <div className="flex flex-col items-center pt-6">
             <h1 className="font-bold text-2xl mb-6">SISA SALDO</h1>
             <div className="w-72">
                 <h3 className="flex justify-between text-xl">
                     <span className="font-bold">BCA</span>
                     <span className="font-bold flex">
                         <span className="mr-2">Rp</span> 
-                        <CountUp from={0} to={state.SaldoBca} separator="," direction="up" duration={1} className="" />,-
+                        <CountUp from={0} to={state.SaldoBca} separator="," direction="up" duration={0.5} className="" />
                     </span>
                 </h3>
                 <h3 className="flex justify-between text-xl">
                     <span className="font-bold">BRI</span>
                     <span className="font-bold flex">
                         <span className="mr-2">Rp</span>
-                        <CountUp from={0} to={state.SaldoBri} separator="," direction="up" duration={1} className="" />,-
+                        <CountUp from={0} to={state.SaldoBri} separator="," direction="up" duration={0.5} className="" />
                     </span>
                 </h3>
                 <h3 className="flex justify-between text-xl">
                     <span className="font-bold">DANAMON</span>
                     <span className="font-bold flex">
                         <span className="mr-2">Rp</span>
-                        <CountUp from={0} to={state.SaldoDanamon} separator="," direction="up" duration={1} className="" />
+                        <CountUp from={0} to={state.SaldoDanamon} separator="," direction="up" duration={0.5} className="" />
                     </span>
                 </h3>
                 <h3 className="flex justify-between text-xl">

@@ -1,6 +1,8 @@
 'use client'
 import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation';
+import { push, ref, runTransaction } from 'firebase/database';
+import { DB } from '../../../../firebase-config';
 
 
 export default function StrukLainLain() {
@@ -41,15 +43,43 @@ export default function StrukLainLain() {
       const admin = formData.get('admin') as string;
       const adminConverter = parseInt(admin).toLocaleString('id-ID');
       const totalbyr = formData.get('totalbyr') as string;
+      const totalbyrConverter = totalByr.toLocaleString('id-ID');
+      const tipeStruk = formData.get('type') as string;
+      const lokasi = formData.get('lokasi') as string;
   
       const dataStruk = {
           tanggal: tanggal.toString(),
+          tipeStruk,
+          lokasi,
           nomorTujuan,
           SN,
           nominal: nominalConverter,
           admin: adminConverter,
           totalbyr,
       };
+
+      
+      const bank = tipeStruk.split(' ')[2];
+      const penerimanya = tipeStruk.split(' ')[0]
+      const sisaSaldoBCA = ref(DB, 'Datas/SaldoAwal/ValueBca');
+      if(bank){
+        runTransaction(sisaSaldoBCA, (currentSaldo) => {
+          return currentSaldo - parseInt(nominal);
+        });
+        const DataMutas = ref(DB, `Mutasi/${lokasi}/${bank}`);
+        const dataStrukMutasi = {
+          tanggal: tanggal.toString(),
+          bank,
+          lokasi,
+          norek: nomorTujuan,
+          penerima: penerimanya,
+          nominal: nominalConverter,
+          admin: adminConverter,
+          totalByr: totalbyrConverter,
+        }
+
+      await push(DataMutas, dataStrukMutasi); 
+    }
       sessionStorage.setItem('strukDataLain', JSON.stringify(dataStruk));
       router.push('/struk-transfer/cetak/lain-lain');
     };
@@ -67,9 +97,38 @@ export default function StrukLainLain() {
   
   return (
     <div>
-      <form action="#" method="POST" className="mx-auto mt-7 max-w-xl" onSubmit={handleOnSubmit}>
-        <div className="grid grid-cols-1 sm:grid-cols-2">
+      <form action="#" method="POST" className="mx-automax-w-m" onSubmit={handleOnSubmit}>
+        <div className="grid grid-cols-1 gap-x-2 gap-y-1 sm:grid-cols-1">
           <div className='sm:col-span-2'>
+          <div className='sm:col-span2'>
+          <label htmlFor="lokasi" className="block text-sm font-semibold leading-1 text-gray-900">
+              Lokasi
+            </label>
+              <select 
+              id='lokasi'
+              name='lokasi'
+                className="block w-full h-8 rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                <option>Cikaret</option>
+                <option>Sukahati</option>
+              </select>
+          </div>
+          <label htmlFor="type" className="block text-sm font-semibold leading-6 text-gray-900">
+              Tipe Struk
+            </label>
+              <select 
+              id='type'
+              name='type'
+                className="block w-full h-8 rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                <option>DANA</option>
+                <option>DANA Pake BCA</option>
+                <option>GOPAY</option>
+                <option>GOPAY Pake BCA</option>
+                <option>SHOPEEPAY</option>
+                <option>SHOPEEPAY Pake BCA</option>
+              </select>
+          </div>
+          <div className='sm:col-span-2'>
+
             <label htmlFor="Nomor Tujuan" className="block text-sm font-semibold leading-6 text-gray-900">
              Nomor Tujuan
             </label>
@@ -81,8 +140,8 @@ export default function StrukLainLain() {
                 autoComplete="phoneNumber"
                 required
                 className="block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-              />
-            </div>
+                />
+          </div>
           </div>
           <div className='sm:col-span-2'>
             <label htmlFor="sn" className="block text-sm font-semibold leading-6 text-gray-900">

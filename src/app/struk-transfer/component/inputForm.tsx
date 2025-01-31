@@ -109,9 +109,8 @@ export default function InputForm() {
 
         const sisaFreeSnapshot = await get(sisaFreeRef)
         const sisaFreeValue = sisaFreeSnapshot.val();
-
         runTransaction(sisaSaldoDanamon, (currentSaldo) => {
-          set(sisaFreeRef, sisaFreeValue - 1);
+            set(sisaFreeRef, sisaFreeValue - 1);
             return currentSaldo - parseInt(nominal.replace(/\./g, ''));
         })
       }

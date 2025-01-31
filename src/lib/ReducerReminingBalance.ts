@@ -11,6 +11,10 @@ export function ReducerReminingBalance(state: StateReminingBalance, action: Acti
             return {...state, SaldoDanamon: action.payload};
         case "SET_FREE_DANAMON":
             return {...state, SaldoFreeDanamon: action.payload};
+        case "SET_MUTASI_CIKARET":
+            return {...state, MutasiCikaret: action.payload};
+        case "SET_MUTASI_SUKAHATI":
+            return {...state, MutasiSukahati: action.payload}
         default:
             return state;
     }
