@@ -9,7 +9,7 @@ export default function CetakStruk() {
     const [activeComponent, setActiveComponent] = React.useState<'transfer' | 'lain-lain'>('transfer');
 
     return(
-    <div className="flex flex-col items-center bg-white-100 p-2 pb-12">
+    <div className="flex flex-col items-center bg-white-100 p-2 mt-12">
         <div className="scale-150 transform mt-36">        
             <div className="flex flex-col items-center justify-center pt-1">
             <div className="flex gap-4 mb-3">
