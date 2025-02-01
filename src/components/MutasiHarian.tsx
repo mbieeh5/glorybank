@@ -10,7 +10,7 @@ import { DB } from "../../firebase-config";
 
 export default function MutasiHarian() {
     const [state, dispatch] = React.useReducer(ReducerReminingBalance, initialStateReminingBalance);
-    const Tanggal = new Date().getDate();
+    const Tanggal = new Date().getDate() < 10 ? `0${new Date().getDate()}` : new Date().getDate();
     const Bulan = new Date().getMonth()+1 < 10 ? `0${new Date().getMonth()+1}` : new Date().getMonth();
     const Tahun = new Date().getFullYear();
 
