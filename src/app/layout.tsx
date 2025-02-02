@@ -18,6 +18,7 @@ export const metadata: Metadata = {
   description: "A banking app for the modern age. made by Rraf-project",
 };
 
+
 export default function RootLayout({
   children,
 }: Readonly<{
