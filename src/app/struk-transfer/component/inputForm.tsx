@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation';
 import { DB } from '../../../../firebase-config';
 import { get, push, ref, runTransaction, set } from 'firebase/database';
+import { BankSeparator } from '@/lib/BankSeparator';
 
 
 export default function InputForm() {
@@ -98,10 +99,7 @@ export default function InputForm() {
         penerima
       }
 
-      const bankBCA = bank.match(/BCA(?!.*DIGITAL)/i) ? "BCA" : null;
-      const bankBRI = bank.match(/BRI/i) ? "BRI" : null;
-      const bankDanamon = bank ? "DANAMON" : null;
-      const sanitizerBank = bankBCA || bankBRI || bankDanamon;
+      const sanitizerBank = BankSeparator(bank);
       
       if (sanitizerBank === "DANAMON") {
         const sisaFreeRef = ref(DB, 'Datas/SisaFree/ValueFreeDanamon');
@@ -167,6 +165,7 @@ export default function InputForm() {
                 className="block w-full h-8 rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
                 <option>Cikaret</option>
                 <option>Sukahati</option>
+                <option>LainLain</option>
               </select>
           </div>
           <div className='sm:col-span-2'>
