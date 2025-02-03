@@ -31,11 +31,27 @@ export interface DataMutasiBank {
     bank: string;
     lokasi: string;
     penerima: string;
+    admin?: string;
     nominal: string;
     norek: string;
     tanggal: string;
     status?: string;
 }
+
+export interface Transaction {
+    tanggal: string;
+    nominal: string;
+    totalbyr?: string;
+    totalByr?: string;
+  }
+  
+export interface BankTransactions {
+    [key: string]: Transaction;
+  }
+  
+export interface DataVal {
+    [key: string]: BankTransactions;
+  }
 
 export interface StateReminingBalance {
     SaldoBca: number,

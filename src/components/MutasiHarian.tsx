@@ -1,7 +1,7 @@
 'use client'
 import React from "react";
 import CountUp from "./CountUp";
-import { initialStateReminingBalance, ValueBank } from "@/types/main";
+import { DataVal, initialStateReminingBalance, ValueBank } from "@/types/main";
 import { ReducerReminingBalance } from "@/lib/ReducerReminingBalance";
 import { DataSnapshot, get, onValue, ref } from "firebase/database";
 import { DB } from "../../firebase-config";
@@ -26,33 +26,35 @@ export default function MutasiHarian() {
     const handleOnMutasiSukahati = () => setIsShowSukahati(!isShowSukahati);
     const handleOnMutasiLainLain = () => setIsShowLainLain(!isShowLainLain);
 
-    const calculateTotals = (dataVal: any) => {
-        let totalNominal = 0;
-        let totalNota = 0;
-        let totalSemua = 0;
-
-        for (const bank in dataVal) {
-            if (dataVal.hasOwnProperty(bank)) {
-                const transactions = dataVal[bank];
-                for (const key in transactions) {
-                    if (transactions.hasOwnProperty(key)) {
-                        const transaction = transactions[key];
-                        const isDateNow = transaction.tanggal.split("@")[0];
-                        const filters = transaction.nominal && `${Tanggal}/${Bulan}/${Tahun}` === isDateNow;
-                        if (filters) {
-                            const totalBayar = transaction.totalbyr || transaction.totalByr;
-                            totalNota++;
-                            totalNominal += parseInt(transaction.nominal.replace(/\./g, ''), 10);
-                            totalSemua += parseInt(totalBayar.replace(/\./g, ''), 10);
+    
+    React.useEffect(() => {
+        const calculateTotals = (dataVal: DataVal) => {
+            let totalNominal = 0;
+            let totalNota = 0;
+            let totalSemua = 0;
+    
+            for (const bank in dataVal) {
+                if (dataVal.hasOwnProperty(bank)) {
+                    const transactions = dataVal[bank];
+                    for (const key in transactions) {
+                        if (transactions.hasOwnProperty(key)) {
+                            const transaction = transactions[key];
+                            const isDateNow = transaction.tanggal.split("@")[0];
+                            const filters = transaction.nominal && `${Tanggal}/${Bulan}/${Tahun}` === isDateNow;
+                            if (filters) {
+                                const totalBayar = transaction.totalbyr || transaction.totalByr;
+                                totalNota++;
+                                totalNominal += parseInt(transaction.nominal.replace(/\./g, ''), 10);
+                                if (totalBayar) {
+                                    totalSemua += parseInt(totalBayar.replace(/\./g, ''), 10);
+                                }
+                            }
                         }
                     }
                 }
             }
-        }
-        return { totalNominal, totalNota, totalSemua };
-    };
-
-    React.useEffect(() => {
+            return { totalNominal, totalNota, totalSemua };
+        };
         const refDb = ref(DB, 'Datas/SaldoAwal');
         const refDBFree = ref(DB, 'Datas/SisaFree');
         const refDbMutasiCikaret = ref(DB, 'Mutasi/Cikaret');

@@ -9,14 +9,11 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@ag-grid-community/client-side-row-model": "^32.3.3",
     "@ant-design/icons": "^5.6.0",
     "@radix-ui/react-navigation-menu": "^1.2.4",
     "@radix-ui/react-slot": "^1.1.1",
     "@react-spring/web": "^9.7.5",
     "@types/jsonwebtoken": "^9.0.7",
-    "ag-grid-community": "^33.0.4",
-    "ag-grid-react": "^33.0.4",
     "class-variance-authority": "^0.7.1",
     "cookie": "^1.0.2",
     "firebase": "^11.2.0",
