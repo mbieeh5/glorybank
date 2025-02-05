@@ -5,6 +5,8 @@ import { DB } from "../../firebase-config";
 import { DataMutasiBank } from "@/types/main";
 import { BankSeparator } from "@/lib/BankSeparator";
 import Swal from "sweetalert2";
+import { MaterialReactTable } from "material-react-table";
+import { Button } from "@mui/material";
 
 export default function TableBank() {
   const [rowData, setRowData] = useState<DataMutasiBank[]>([]);
@@ -42,19 +44,19 @@ export default function TableBank() {
     const processData = (snapshot: DataSnapshot, lokasi: string): DataMutasiBank[] => {
       const dataVal = snapshot.val() || {};
       const dataList: DataMutasiBank[] = [];
-    
+      console.log(dataVal);
       Object.entries(dataVal).forEach(([bank, transactions]) => {
         Object.entries(transactions as DataMutasiBank).forEach(([id, data]) => {
           dataList.push({ ...data, id, lokasi, bank });
         });
       });
-    
+
       return dataList;
     };
 
     const locations = ["Cikaret", "Sukahati", "LainLain"];
     const listeners: (() => void)[] = [];
-  
+
     locations.forEach((lokasi) => {
       const refDb = ref(DB, `Mutasi/${lokasi}`);
       const listener = onValue(refDb, (snapshot) => {
@@ -63,72 +65,56 @@ export default function TableBank() {
       });
       listeners.push(listener);
     });
-  
+
     const updateData = (newData: DataMutasiBank[]) => {
       setRowData((prevData) => {
         const combinedData = [...prevData, ...newData];
         const filteredData = combinedData.filter((item) => {
-          const tanggalDB = item.tanggal?.split('@')[0];
+          const tanggalDB = item.tanggal?.split("@")[0];
           return today === tanggalDB;
         });
-  
+
         setTotalData(filteredData.length);
         return filteredData;
       });
     };
-  
+
     return () => {
       listeners.forEach((unsubscribe) => unsubscribe());
     };
-    
   }, [today]);
 
+  const columns = [
+    { accessorKey: "tanggal", header: "TANGGAL" },
+    { accessorKey: "lokasi", header: "LOKASI" },
+    { accessorKey: "bank", header: "BANK" },
+    { accessorKey: "norek", header: "NOREK" },
+    { accessorKey: "nominal", header: "NOMINAL" },
+    { accessorKey: "penerima", header: "PENERIMA" },
+    { accessorKey: "admin", header: "ADMIN" },
+    { accessorKey: "status", header: "STATUS", Cell: ({ row }: { row: { original: DataMutasiBank } }) => row.original.status || "PENDING" },
+    {
+      accessorKey: "aksi",
+      header: "AKSI",
+      Cell: ({ row }:{ row: { original: DataMutasiBank } }) => (
+        <div style={{ display: "flex", gap: "5px" }}>
+          <Button variant="contained" color="primary" onClick={() => handleUpdateStatus(row.original, "SUKSES")}>
+            Sukses
+          </Button>
+          <Button variant="contained" color="error" onClick={() => handleUpdateStatus(row.original, "BATAL")}>
+            Batal
+          </Button>
+        </div>
+      ),
+    },
+  ];
+
   return (
-    <div className="p-3 w-full">
-      <h2 className="text-lg font-bold mb-4">TRF HARI INI: {totalData} Nota</h2>
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-white border border-gray-200">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="py-2 px-4 border-b">TANGGAL</th>
-              <th className="py-2 px-4 border-b">LOKASI</th>
-              <th className="py-2 px-4 border-b">BANK</th>
-              <th className="py-2 px-4 border-b">NOREK</th>
-              <th className="py-2 px-4 border-b">NOMINAL</th>
-              <th className="py-2 px-4 border-b">PENERIMA</th>
-              <th className="py-2 px-4 border-b">ADMIN</th>
-              <th className="py-2 px-4 border-b">STATUS</th>
-              <th className="py-2 px-4 border-b">AKSI</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rowData.map((row, index) => (
-              <tr key={index} className="hover:bg-gray-50">
-                <td className="py-2 px-4 border-b">{row.tanggal}</td>
-                <td className="py-2 px-4 border-b">{row.lokasi}</td>
-                <td className="py-2 px-4 border-b">{row.bank}</td>
-                <td className="py-2 px-4 border-b">{row.norek}</td>
-                <td className="py-2 px-4 border-b">{row.nominal}</td>
-                <td className="py-2 px-4 border-b">{row.penerima}</td>
-                <td className="py-2 px-4 border-b">{row.admin}</td>
-                <td className="py-2 px-4 border-b">{row.status || "PENDING"}</td>
-                <td className="py-2 px-4 border-b">
-                  <div className="flex space-x-2">
-                    <ActionButton label="Sukses" color="blue" onClick={() => handleUpdateStatus(row, "SUKSES")} />
-                    <ActionButton label="Batal" color="red" onClick={() => handleUpdateStatus(row, "BATAL")} />
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+    <div style={{ padding: "1rem" }}>
+      <h2 style={{ marginBottom: "1rem", fontWeight: "bold" }}>TRF HARI INI: {totalData} Nota</h2>
+      <MaterialReactTable
+        enablePagination={false}
+      columns={columns} data={rowData} />
     </div>
   );
 }
-
-const ActionButton = ({ label, color, onClick }: { label: string; color: string; onClick: () => void }) => (
-  <button className={`px-4 py-2 bg-${color}-500 text-white rounded hover:bg-${color}-600 transition`} onClick={onClick}>
-    {label}
-  </button>
-);

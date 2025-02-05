@@ -91,6 +91,7 @@ export default function InputForm() {
           nominal,
           admin,
           totalbyr,
+          status: 'SUKSES',
       };
 
       const dataUser = {

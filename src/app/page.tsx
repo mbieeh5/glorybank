@@ -16,10 +16,8 @@ export default function Home() {
           <MutasiHarian />
         </div>
       </div>
-      <main className="flex flex-col items-center justify-center w-full flex-1 px-20 text-center">
-        <div className="flex flex-wrap items-center justify-around max-w-4xl mt-6 sm:w-full">
+      <main className="">
         <TableBank />
-            </div>
       </main>
     </div>
   );
