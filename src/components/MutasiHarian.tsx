@@ -40,7 +40,8 @@ export default function MutasiHarian() {
                         if (transactions.hasOwnProperty(key)) {
                             const transaction = transactions[key];
                             const isDateNow = transaction.tanggal.split("@")[0];
-                            const filters = transaction.nominal && `${Tanggal}/${Bulan}/${Tahun}` === isDateNow;
+                            const isSucceess = transaction.status
+                            const filters = (transaction.nominal && `${Tanggal}/${Bulan}/${Tahun}` === isDateNow) && (isSucceess === "SUKSES") ;
                             if (filters) {
                                 const totalBayar = transaction.totalbyr || transaction.totalByr;
                                 totalNota++;

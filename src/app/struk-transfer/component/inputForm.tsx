@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { DB } from '../../../../firebase-config';
 import { get, push, ref, runTransaction, set } from 'firebase/database';
 import { BankSeparator } from '@/lib/BankSeparator';
+import Loading from '@/components/Loading';
 
 
 export default function InputForm() {
@@ -15,6 +16,7 @@ export default function InputForm() {
     const [totalByr, setTotalByr] = useState<number>(0);
     const [tanggal, setTanggal] = useState<string>("")
     const [lokasi, setLokasi] = useState<string>('Cikaret');
+    const [isLoading, setIsLoading] = useState<boolean>(false);
     const router = useRouter();
 
     const formatDate = (date: Date): string => {
@@ -69,74 +71,74 @@ export default function InputForm() {
 
     const handleOnSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
-  
       setTanggal(formatDate(new Date()));
-  
-      const formData = new FormData(e.currentTarget);
-      const bank = formData.get('bank') as string;
-      const lokasi = formData.get('lokasi') as string;
-      const norek = formData.get('norek') as string;
-      const penerima = formData.get('penerima') as string;
-      const berita = formData.get('berita') as string || "GloryCell";
-      const totalbyr = formData.get('totalbyr') as string;
-  
-      const dataStruk = {
+      setIsLoading(true);
+    
+      try {
+        const formData = new FormData(e.currentTarget);
+        const bank = formData.get('bank') as string;
+        const lokasi = formData.get('lokasi') as string;
+        const norek = formData.get('norek') as string;
+        const penerima = formData.get('penerima') as string;
+        const berita = (formData.get('berita') as string) || "GloryCell";
+        const totalbyr = formData.get('totalbyr') as string;
+    
+        const dataStruk = {
           tanggal: tanggal.toString(),
           lokasi,
           bank,
           norek,
           penerima,
-          pengirim : "RAFI ANGGORO",
+          pengirim: "RAFI ANGGORO",
           berita,
           nominal,
           admin,
           totalbyr,
           status: 'SUKSES',
-      };
-
-      const dataUser = {
-        bank, 
-        norek,
-        penerima
-      }
-
-      const sanitizerBank = BankSeparator(bank);
-      
-      if (sanitizerBank === "DANAMON") {
-        const sisaFreeRef = ref(DB, 'Datas/SisaFree/ValueFreeDanamon');
-        const sisaSaldoDanamon = ref(DB, 'Datas/SaldoAwal/ValueDanamon');
-
-        const sisaFreeSnapshot = await get(sisaFreeRef)
-        const sisaFreeValue = sisaFreeSnapshot.val();
-        runTransaction(sisaSaldoDanamon, (currentSaldo) => {
+        };
+    
+        const dataUser = { bank, norek, penerima };
+        const sanitizerBank = BankSeparator(bank);
+    
+        if (sanitizerBank === "DANAMON") {
+          const sisaFreeRef = ref(DB, 'Datas/SisaFree/ValueFreeDanamon');
+          const sisaSaldoDanamon = ref(DB, 'Datas/SaldoAwal/ValueDanamon');
+          const sisaFreeSnapshot = await get(sisaFreeRef);
+          const sisaFreeValue = sisaFreeSnapshot.val();
+          await runTransaction(sisaSaldoDanamon, (currentSaldo) => {
             set(sisaFreeRef, sisaFreeValue - 1);
             return currentSaldo - parseInt(nominal.replace(/\./g, ''));
-        })
-      }
-      if (sanitizerBank === "BCA") {
-        const sisaSaldoDanamon = ref(DB, 'Datas/SaldoAwal/ValueBca');
-
-        runTransaction(sisaSaldoDanamon, (currentSaldo) => {
+          });
+        }
+    
+        if (sanitizerBank === "BCA") {
+          const sisaSaldoBca = ref(DB, 'Datas/SaldoAwal/ValueBca');
+          await runTransaction(sisaSaldoBca, (currentSaldo) => {
             return currentSaldo - parseInt(nominal.replace(/\./g, ''));
-        })
-      }
-      if (sanitizerBank === "BRI") {
-        const sisaSaldoDanamon = ref(DB, 'Datas/SaldoAwal/ValueBri');
-
-        runTransaction(sisaSaldoDanamon, (currentSaldo) => {
+          });
+        }
+    
+        if (sanitizerBank === "BRI") {
+          const sisaSaldoBri = ref(DB, 'Datas/SaldoAwal/ValueBri');
+          await runTransaction(sisaSaldoBri, (currentSaldo) => {
             return currentSaldo - parseInt(nominal.replace(/\./g, ''));
-        })
+          });
+        }
+    
+        const DataUsers = ref(DB, `Datas/UserInfo/`);
+        const DataMutasi = ref(DB, `Mutasi/${lokasi}/${sanitizerBank}/`);
+    
+        await Promise.all([push(DataMutasi, dataStruk), push(DataUsers, dataUser)]);
+    
+        sessionStorage.setItem('strukData', JSON.stringify(dataStruk));
+        router.push('/struk-transfer/cetak');
+      } catch (error) {
+        console.error("Error saat menyimpan data:", error);
+      } finally {
+        setIsLoading(false);
       }
-
-      const DataUsers = ref(DB, `Datas/UserInfo/`);
-      const DataMutasi = ref(DB, `Mutasi/${lokasi}/${sanitizerBank}/`);
-
-      await push(DataMutasi, dataStruk);
-      await push(DataUsers, dataUser)
-
-      sessionStorage.setItem('strukData', JSON.stringify(dataStruk));
-      router.push('/struk-transfer/cetak');
     };
+    
 
     const handleResetForm = () => {
     location.reload();
@@ -149,9 +151,10 @@ export default function InputForm() {
     const cleanedNominal = parseInt(nominal.replace(/\./g, '') || '0');
     calculation(cleanedNominal);
 }, [calculation, nominal]);
-  
+
   return (
     <div>
+      {isLoading ? (<Loading/>) : (
       <form action="#" method="POST" className="mx-automax-w-m" onSubmit={handleOnSubmit}>
         <div className="grid grid-cols-1 gap-x-2 gap-y-1 sm:grid-cols-1">
           <div className='sm:col-span2'>
@@ -289,6 +292,7 @@ export default function InputForm() {
           </button>
             </div>
       </form>
+    )}
     </div>
   )
 }
