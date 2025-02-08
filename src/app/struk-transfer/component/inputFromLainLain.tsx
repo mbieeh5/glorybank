@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation';
 import { push, ref, runTransaction } from 'firebase/database';
 import { DB } from '../../../../firebase-config';
+import Loading from '@/components/Loading';
 
 
 export default function StrukLainLain() {
@@ -11,6 +12,7 @@ export default function StrukLainLain() {
     const [admin, setAdmin] = useState<number>(0);
     const [totalByr, setTotalByr] = useState<number>(0);
     const [tanggal, setTanggal] = useState<string>("")
+    const [ isLoading, setIsLoading] = useState<boolean>(false);
     const router = useRouter();
 
     const formatDate = (date: Date): string => {
@@ -32,22 +34,24 @@ export default function StrukLainLain() {
 
     const handleOnSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
-  
-      setTanggal(formatDate(new Date()));
-  
-      const formData = new FormData(e.currentTarget);
-      const SN = formData.get('SN') as string;
-      const nomorTujuan = formData.get('NomorTujuan') as string;
-      const nominal = formData.get('nominal') as string;
-      const nominalConverter = parseInt(nominal).toLocaleString('id-ID');
-      const admin = formData.get('admin') as string;
-      const adminConverter = parseInt(admin).toLocaleString('id-ID');
-      const totalbyr = formData.get('totalbyr') as string;
-      const totalbyrConverter = totalByr.toLocaleString('id-ID');
-      const tipeStruk = formData.get('type') as string;
-      const lokasi = formData.get('lokasi') as string;
-  
-      const dataStruk = {
+    
+      setIsLoading(true);
+    
+      try {
+        setTanggal(formatDate(new Date()));
+    
+        const formData = new FormData(e.currentTarget);
+        const SN = formData.get('SN') as string;
+        const nomorTujuan = formData.get('NomorTujuan') as string;
+        const nominal = formData.get('nominal') as string;
+        const nominalConverter = parseInt(nominal).toLocaleString('id-ID');
+        const admin = formData.get('admin') as string;
+        const adminConverter = parseInt(admin).toLocaleString('id-ID');
+        const totalbyr = formData.get('totalbyr') as string;
+        const tipeStruk = formData.get('type') as string;
+        const lokasi = formData.get('lokasi') as string;
+    
+        const dataStruk = {
           tanggal: tanggal.toString(),
           tipeStruk,
           lokasi,
@@ -56,33 +60,44 @@ export default function StrukLainLain() {
           nominal: nominalConverter,
           admin: adminConverter,
           totalbyr,
-      };
-
-      
-      const bank = tipeStruk.split(' ')[2];
-      const penerimanya = tipeStruk.split(' ')[0]
-      const sisaSaldoBCA = ref(DB, 'Datas/SaldoAwal/ValueBca');
-      if(bank){
-        runTransaction(sisaSaldoBCA, (currentSaldo) => {
-          return currentSaldo - parseInt(nominal);
-        });
-        const DataMutas = ref(DB, `Mutasi/${lokasi}/${bank}`);
-        const dataStrukMutasi = {
-          tanggal: tanggal.toString(),
-          bank,
-          lokasi,
-          norek: nomorTujuan,
-          penerima: penerimanya,
-          nominal: nominalConverter,
-          admin: adminConverter,
-          totalByr: totalbyrConverter,
+        };
+    
+        const bank = tipeStruk.split(' ')[2];
+        const penerimanya = tipeStruk.split(' ')[0];
+        
+        if (bank) {
+          const sisaSaldoBCA = ref(DB, 'Datas/SaldoAwal/ValueBca');
+          const totalByrConverter = totalByr.toLocaleString('id-ID');
+          await runTransaction(sisaSaldoBCA, (currentSaldo) => {
+            return currentSaldo - parseInt(nominal);
+          });
+    
+          const DataMutas = ref(DB, `Mutasi/${lokasi}/${bank}`);
+          const dataStrukMutasi = {
+            tanggal: tanggal.toString(),
+            bank,
+            lokasi,
+            norek: nomorTujuan,
+            penerima: penerimanya,
+            nominal: nominalConverter,
+            admin: adminConverter,
+            status: "SUKSES",
+            totalbyr: totalByrConverter,
+          };
+    
+          await push(DataMutas, dataStrukMutasi);
         }
-
-      await push(DataMutas, dataStrukMutasi); 
-    }
-      sessionStorage.setItem('strukDataLain', JSON.stringify(dataStruk));
-      router.push('/struk-transfer/cetak/lain-lain');
+        
+        sessionStorage.setItem('strukDataLain', JSON.stringify(dataStruk));
+        router.push('/struk-transfer/cetak/lain-lain');
+    
+      } catch (error) {
+        console.error("Terjadi kesalahan:", error);
+      } finally {
+        setIsLoading(false);
+      }
     };
+    
 
     const handleResetForm = () => {
     location.reload();
@@ -94,9 +109,11 @@ export default function StrukLainLain() {
     setTanggal(formatDate(dateNow));
     calculation(nominal)
 }, [calculation, nominal]);
-  
+
   return (
     <div>
+      {isLoading ? (<Loading/>) : (
+        
       <form action="#" method="POST" className="mx-automax-w-m" onSubmit={handleOnSubmit}>
         <div className="grid grid-cols-1 gap-x-2 gap-y-1 sm:grid-cols-1">
           <div className='sm:col-span-2'>
@@ -223,6 +240,7 @@ export default function StrukLainLain() {
           </button>
             </div>
       </form>
+    )}
     </div>
   )
 }

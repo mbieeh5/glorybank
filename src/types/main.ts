@@ -40,6 +40,7 @@ export interface DataMutasiBank {
 
 export interface Transaction {
     tanggal: string;
+    status: string;
     nominal: string;
     totalbyr?: string;
     totalByr?: string;
