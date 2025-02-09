@@ -87,7 +87,7 @@ export default function StrukLainLain() {
     
           await push(DataMutas, dataStrukMutasi);
         }
-        
+
         sessionStorage.setItem('strukDataLain', JSON.stringify(dataStruk));
         router.push('/struk-transfer/cetak/lain-lain');
     
@@ -142,6 +142,9 @@ export default function StrukLainLain() {
                 <option>GOPAY Pake BCA</option>
                 <option>SHOPEEPAY</option>
                 <option>SHOPEEPAY Pake BCA</option>
+                <option>OVO</option>
+                <option>OVO Pake BCA</option>
+                <option>GRABDRIVER</option>
               </select>
           </div>
           <div className='sm:col-span-2'>
