@@ -16,32 +16,39 @@ import {
   RowSelectionModule,
   RowSelectionOptions,
   ValidationModule,
+  CellStyleModule,
+  TextFilterModule,
+  DateFilterModule
 } from "ag-grid-community";
 import useGetDataBank from "@/hooks/getDataBank";
 import Swal from "sweetalert2";
 import { BankSeparator } from "@/lib/BankSeparator";
 import { ref, remove, runTransaction, update } from "firebase/database";
 import { DB } from "../../firebase-config";
+import filterParams from "./DateFilterComponent";
 
 ModuleRegistry.registerModules([
   ClientSideRowModelApiModule,
   RowSelectionModule,
   RowApiModule,
   ClientSideRowModelModule,
-  ValidationModule
+  DateFilterModule,
+  CellStyleModule,
+  TextFilterModule,
+  ValidationModule/* Development Only */,
 ]);
 
 export default function TableBank(){
   const gridRef = useRef<AgGridReact>(null);
   const {rowData, totalData} = useGetDataBank();
   const [columnDefs] = useState<ColDef[]>([
-    { field: "tanggal", headerName: "TANGGAL" },
-    { field: "lokasi",headerName: "LOKASI"  },
-    { field: "bank", headerName: "BANK" },
+    { field: "tanggal", headerName: "TANGGAL", filter: "agDateColumnFilter", filterParams: filterParams },
+    { field: "lokasi",headerName: "LOKASI", filter: 'agTextColumnFilter', filterParams: {}  },
+    { field: "bank", headerName: "BANK", },
     { field: "norek", headerName: "NOREK" },
     { field: "penerima", headerName: "NAMA" },
     { field: "nominal", headerName: "NOMINAL" },
-    { field: "status", headerName: "STATUS" },
+    { field: "status", headerName: "STATUS",},
   ]);
 
   const defaultColDef = useMemo<ColDef>(() => {

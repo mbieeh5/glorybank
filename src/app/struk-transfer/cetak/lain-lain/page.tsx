@@ -118,21 +118,19 @@ export default function CetakStruk() {
                         }
                         <h2 className="mt-0 text-s font-italic tracking-tight text-gray-900 sm:text-1xl">Top Up {regexTheTipeStruk(a.tipeStruk)}</h2>
                         <div className="grid grid-cols-1 sm:grid-cols-1 gap-0">
-                                {/* Nomor Tujuan */}
+                                
                                 <div className="flex items-center text-gray-700 font-medium text-sm">
                                     <span className="w-[35%]">Nomor</span>
                                     <div className="font-bold mr-1">:</div>
                                     <span className="font-bold text-gray-900 break-words">{a.nomorTujuan}</span>
                                 </div>
 
-                                {/* Nominal */}
                                 <div className="flex items-center text-sm">
                                     <span className="w-[35%]">Nominal</span>
                                     <div className="font-bold mr-1">:</div>
                                     <span className="font-bold text-gray-900">Rp {a.nominal}.-</span>
                                 </div>
                                 
-                                {/* SN */}
                                 <div className="flex items-center justify-center text-gray-700 font-medium border-b border-gray-900 py-1 max-w-xs mx-auto">
                                     <span
                                         className={`font-bold text-gray-900 text-center break-words ${
@@ -142,28 +140,25 @@ export default function CetakStruk() {
                                         {a.SN.replace(/[-\/]/g, " ")}
                                     </span>
                                     </div>
-                        {/* Struk Confirmation */}
+                        
                         <div className="flex text-gray-700 font-medium text-[12px]">
                             <span className="font-normal text-center">
                             Struk ini sebagai bukti pembayaran yang sah mohon disimpan.
                             </span>
                         </div>
 
-                        {/* Admin Fee */}
                         <div className="flex items-center text-gray-700 font-medium text-[12px]">
                             <span className="w-[35%]">Admin</span>
                             <div className="font-bold mr-1">:</div>
                             <span className="font-bold">Rp {a.admin}.-</span>
                         </div>
 
-                        {/* Total Bayar */}
                         <div className="flex items-center text-gray-700 font-medium text-[12px]">
                             <span className="w-[35%]">Total Bayar</span>
                             <div className="font-bold mr-1">:</div>
                             <span className="font-bold">Rp {a.totalbyr}.-</span>
                         </div>
 
-                        {/* Thank You Message */}
                         <div className="flex flex-col text-center text-gray-700 font-medium">
                             <span className="font-normal">TERIMA KASIH</span>
                             <span className="font-normal">
