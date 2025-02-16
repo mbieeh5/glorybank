@@ -24,8 +24,9 @@ import useGetDataBank from "@/hooks/getDataBank";
 import Swal from "sweetalert2";
 import { BankSeparator } from "@/lib/BankSeparator";
 import { ref, remove, runTransaction, update } from "firebase/database";
-import { DB } from "../../firebase-config";
+import { auth, DB } from "../../firebase-config";
 import filterParams from "./DateFilterComponent";
+import { DataMutasiBank } from "@/types/main";
 
 ModuleRegistry.registerModules([
   ClientSideRowModelApiModule,
@@ -41,14 +42,18 @@ ModuleRegistry.registerModules([
 export default function TableBank(){
   const gridRef = useRef<AgGridReact>(null);
   const {rowData, totalData} = useGetDataBank();
+  const [ selectedData, setSelectedData ] = useState<DataMutasiBank[]>([]);
+  const [ totalDataFinal, setTotalDataFinal ] = useState<number>(0);
+
   const [columnDefs] = useState<ColDef[]>([
-    { field: "tanggal", headerName: "TANGGAL", filter: "agDateColumnFilter", filterParams: filterParams },
-    { field: "lokasi",headerName: "LOKASI", filter: 'agTextColumnFilter', filterParams: {}  },
-    { field: "bank", headerName: "BANK", },
-    { field: "norek", headerName: "NOREK" },
-    { field: "penerima", headerName: "NAMA" },
-    { field: "nominal", headerName: "NOMINAL" },
-    { field: "status", headerName: "STATUS",},
+    { field: "tanggal", headerName: "TANGGAL", filter: "agDateColumnFilter", filterParams: filterParams, maxWidth: 190  },
+    { field: "lokasi",headerName: "LOKASI", filter: 'agTextColumnFilter', maxWidth: 100,  },
+    { field: "bank", headerName: "BANK", maxWidth: 180, filter: "agTextColumnFilter" },
+    { field: "norek", headerName: "NOREK", filter: "agTextColumnFilter",maxWidth: 160  },
+    { field: "penerima", headerName: "NAMA", filter: "agTextColumnFilter"  },
+    { field: "nominal", headerName: "NOMINAL",maxWidth: 100  },
+    { field: "admin", headerName: "ADMIN", maxWidth: 100  },
+    { field: "status", headerName: "STATUS",maxWidth: 100 }
   ]);
 
   const defaultColDef = useMemo<ColDef>(() => {
@@ -117,22 +122,29 @@ export default function TableBank(){
           const path = `Mutasi/${item.lokasi}/${sanitizerBank}/`;
           const capitalizeFirstLetter = sanitizerBank.charAt(0).toUpperCase() + sanitizerBank.slice(1).toLowerCase();
           const pathSaldo = `Datas/SaldoAwal/Value${capitalizeFirstLetter}`;
+          const akun = auth.currentUser?.email;
+          const tanggalStatus = new Date().toISOString();
+          const testingUpdateData = {[item.id] : {...item, akun, tanggalStatus}}
 
             if(newStatus === "SUKSES"){
+              await update(ref(DB, 'History/Mutasi/'),testingUpdateData)
               await runTransaction(ref(DB, pathSaldo), (currentSaldo) => (currentSaldo || 0) - parseInt(item.nominal.replace(/\./g,""), 10));
             }
 
             if(newStatus === "BATAL" || newStatus === "PENDING"){
+              await update(ref(DB, 'History/Mutasi/'),testingUpdateData)
               await runTransaction(ref(DB, pathSaldo), (currentSaldo) => (currentSaldo || 0) + parseInt(item.nominal.replace(/\./g,""), 10));
             }
 
             if(newStatus === "HAPUS"){
-              await update(ref(DB,'History/TempatSampah/'),itemToUpdate);
+              await update(ref(DB,'History/TempatSampah/'),testingUpdateData);
               await remove(ref(DB, `${path}${item.id}`));
               return;
             }
+            
 
-        await update(ref(DB, path), itemToUpdate)
+          await update(ref(DB, 'History/Pelunasan/'), testingUpdateData);
+          await update(ref(DB, path), itemToUpdate)
         Swal.fire({
           icon: 'success',
           title: 'Berhasil!',
@@ -150,47 +162,155 @@ export default function TableBank(){
     }
   }, []);
 
+  const onSelectionChanged = useCallback(() => {
+    if(!gridRef.current) return;
+    //const selectedRows = gridRef.current.api.getSelectedRows();
+    const selectedRows = gridRef.current.api.getRenderedNodes().filter(node => node.isSelected()).map(node => node.data);
+    setSelectedData(selectedRows);
+  }, [])
+
+  const TotalNominal = useMemo(() => {
+    return selectedData.reduce((sum, item) => sum + parseInt(item.nominal.replace(/\./g, ""), 10), 0);
+  },[selectedData])
+
+  const totalAdmin = useMemo(() => {
+    return selectedData.reduce((sum, item) => sum + (item.admin ? parseInt(item.admin.replace(/\./g, ""), 10) : 0), 0);
+  },[selectedData])
+
+  const maxHeightFAB = selectedData.length > 6 ? "19rem" : 'auto';
+
+  const onFilterChanged = useCallback(() => {
+    if(gridRef.current) {
+      const filterCount = gridRef.current.api.getDisplayedRowCount();
+      setTotalDataFinal(filterCount);
+    }
+  },[])
+
   return (
 <div className="container mx-auto p-4">
   <div className="flex flex-col h-full">
-      <div className="mb-1 mt-1 text-center">
-        <h2 className="text-xl font-bold mb-2">TOTAL NOTA : {totalData}</h2>
-        <button 
-          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mr-2" 
-          onClick={() => updateItems("LUNAS")}>
-          TANDAI LUNAS
-        </button>
-        <button 
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2" 
-          onClick={() => updateItems("SUKSES")}>
-          TANDAI SUKSES
-        </button>
-        <button 
-          className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded mr-2" 
-          onClick={() => updateItems("PENDING")}>
-          TANDAI PENDING
-        </button>
-        <button 
-          className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded mr-2" 
-          onClick={() => updateItems("BATAL")}>
-          BATALKAN
-        </button>
-        <button 
-          className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mr-2" 
-          onClick={() => updateItems("HAPUS")}>
-          HAPUS
-        </button>
-      </div>
-    <div className="flex-grow mt-7">
-      <div className="ag-theme-alpine" style={{ height: '30rem' }}>
+      <h2 className="text-xl font-bold text-center">TOTAL NOTA : {totalDataFinal === 0 ? totalData : totalDataFinal}</h2>
+      <div className="flex flex-grow mt-7 relative lg:flex-row flex-col">
+      <div className="ag-theme-alpine flex-grow" style={{ height: '30rem' }}>
         <AgGridReact
           ref={gridRef}
           rowData={rowData}
           columnDefs={columnDefs}
           defaultColDef={defaultColDef}
           rowSelection={rowSelection}
+          onSelectionChanged={onSelectionChanged}
+          onFilterChanged={onFilterChanged}
         />
       </div>
+      {selectedData.length > 0 && (
+        <div className="hidden lg:block flex-shrink-0 w-80 ml-4">
+          <div className="bg-gray-100 p-4 rounded-lg shadow-lg h-fit">
+          {selectedData.some((item) => item.lokasi === "Cikaret") && selectedData.some((item) => item.lokasi === "Sukahati") ? (
+              <>
+                {selectedData.some((item) => item.lokasi === "Cikaret") && (
+                  <h3 className="text-lg font-bold mb-1">
+                    TOTAL {selectedData.filter((item) => item.lokasi === "Cikaret").length} NOTA CIKARET
+                  </h3>
+                )}
+                {selectedData.some((item) => item.lokasi === "Sukahati") && (
+                  <h3 className="text-lg font-bold mb-1">
+                    TOTAL {selectedData.filter((item) => item.lokasi === "Sukahati").length} NOTA SUKAHATI
+                  </h3>
+                )}
+              <h3 className="text-lg font-bold mb-1">
+                TOTAL {selectedData.filter((item) => item.lokasi === "Cikaret").length + selectedData.filter((item) => item.lokasi === "Sukahati").length} NOTA
+              </h3>
+              </>
+            ) : (
+              <>
+                {selectedData.some((item) => item.lokasi === "Cikaret") && (
+                  <h3 className="text-lg font-bold mb-2">
+                    TOTAL {selectedData.filter((item) => item.lokasi === "Cikaret").length} NOTA CIKARET
+                  </h3>
+                )}
+                {selectedData.some((item) => item.lokasi === "Sukahati") && (
+                  <h3 className="text-lg font-bold mb-2">
+                    TOTAL {selectedData.filter((item) => item.lokasi === "Sukahati").length} NOTA SUKAHATI
+                  </h3>
+                )}
+              </>
+            )}
+            <div className="mt-4" style={{maxHeight: maxHeightFAB, overflowY: "auto"}}>
+              {selectedData.map((d) => (
+                <div key={d.id} className="mb-2 p-2 border-b border-gray-300">
+                  <strong>{d.bank}</strong> {d.nominal}
+                </div>
+              ))}
+            </div>
+            <p><strong>NOMINAL :</strong> Rp {TotalNominal.toLocaleString()}</p>
+            <p><strong>ADMIN :</strong> Rp {(totalAdmin).toLocaleString()}</p>
+            <p><strong>TOTAL :</strong> Rp {(totalAdmin + TotalNominal).toLocaleString()}</p>
+          <div className="flex flex-col mb-1 mt-1 text-center">
+            <button 
+              className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-2" 
+              onClick={() => updateItems("LUNAS")}>
+              TANDAI LUNAS
+            </button>
+            <button 
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-2" 
+              onClick={() => updateItems("SUKSES")}>
+              TANDAI SUKSES
+            </button>
+            <button 
+              className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded mb-2" 
+              onClick={() => updateItems("PENDING")}>
+              TANDAI PENDING
+            </button>
+            <button 
+              className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded mb-2" 
+              onClick={() => updateItems("BATAL")}>
+              BATALKAN
+            </button>
+            <button 
+              className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mb-2" 
+              onClick={() => updateItems("HAPUS")}>
+              HAPUS
+            </button>
+          </div>
+          </div>
+        </div>
+      )}
+      {selectedData.length > 0 && (
+        <div className="lg:hidden w-full mt-4">
+          <div className="bg-gray-100 p-4 rounded-lg shadow-lg h-fit">
+          <h3 className="text-lg font-bold mb-2">Total Nota {selectedData.length}</h3>
+            <p><strong>NOMINAL :</strong> Rp {TotalNominal.toLocaleString()}</p>
+            <p><strong>ADMIN :</strong> Rp {(totalAdmin).toLocaleString()}</p>
+          </div>
+          <div className="flex flex-col mb-1 mt-1 text-center">
+            <button 
+              className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-2" 
+              onClick={() => updateItems("LUNAS")}>
+              TANDAI LUNAS
+            </button>
+            <button 
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-2" 
+              onClick={() => updateItems("SUKSES")}>
+              TANDAI SUKSES
+            </button>
+            <button 
+              className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded mb-2" 
+              onClick={() => updateItems("PENDING")}>
+              TANDAI PENDING
+            </button>
+            <button 
+              className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded mb-2" 
+              onClick={() => updateItems("BATAL")}>
+              BATALKAN
+            </button>
+            <button 
+              className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mb-2" 
+              onClick={() => updateItems("HAPUS")}>
+              HAPUS
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   </div>
 </div>

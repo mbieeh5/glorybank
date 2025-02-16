@@ -139,7 +139,6 @@ export default function InputForm() {
       }
     };
     
-
     const handleResetForm = () => {
     location.reload();
     }
