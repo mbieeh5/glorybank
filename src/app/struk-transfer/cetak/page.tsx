@@ -118,70 +118,70 @@ export default function Cetak() {
                         }
                         <h2 className="mt-0 text-s font-italic tracking-tight text-gray-900 sm:text-1xl">Transfer Antar Bank</h2>
                         <div className="grid grid-cols-1 sm:grid-cols-1 gap-0">
-                        {/* Bank Information */}
+                        
                         <div className="flex items-center text-gray-700 font-medium text-sm">
                             <span className="w-[35%]">Bank</span>
                             <div className="font-bold mr-1">:</div>
                             <span className="font-bold text-gray-900 break-words">{a.bank}</span>
                         </div>
 
-                        {/* NoRek */}
+                        
                         <div className="flex items-center text-gray-700 font-medium text-sm">
                             <span className="w-[35%]">NoRek</span>
                             <div className="font-bold mr-1">:</div>
                             <span className="font-bold text-gray-900 break-words">{a.norek}</span>
                         </div>
 
-                        {/* Nama Penerima */}
+                        
                         <div className="flex items-start text-gray-700 font-medium text-sm">
                             <span className="w-[35%]">Nama</span>
                             <div className="font-bold mr-1">:</div>
                             <div className="font-bold text-gray-900 break-normal w-full max-w-32">{a.penerima}</div>
                         </div>
 
-                        {/* Nama Pengirim */}
+                        
                         <div className="flex items-start text-gray-700 font-medium text-sm">
                             <span className="w-[35%]">Pengirim</span>
                             <div className="font-bold mr-1">:</div>
                             <span className="font-bold text-gray-900 break-words">{a.pengirim}</span>
                         </div>
 
-                        {/* Berita */}
+                       
                         <div className="flex items-start text-gray-700 font-medium text-sm">
                             <span className="w-[35%]">Berita</span>
                             <div className="font-bold mr-1">:</div>
                             <span className="font-bold text-gray-900 break-words">{a.berita}</span>
                         </div>
 
-                        {/* Nominal */}
+                        
                         <div className="flex items-center border-b border-gray-900 py-1 text-sm">
                             <span className="w-[35%]">Nominal</span>
                             <div className="font-bold mr-1">:</div>
                             <span className="font-bold text-gray-900">Rp. {a.nominal}.-</span>
                         </div>
 
-                        {/* Struk Confirmation */}
+                        
                         <div className="flex text-gray-700 font-medium text-[12px]">
                             <span className="font-normal text-center">
                             Struk ini sebagai bukti pembayaran yang sah mohon disimpan.
                             </span>
                         </div>
 
-                        {/* Admin Fee */}
+                        
                         <div className="flex items-center text-gray-700 font-medium text-[12px]">
                             <span className="w-[35%]">Admin</span>
                             <div className="font-bold mr-1">:</div>
                             <span className="font-bold">Rp. {a.admin.toLocaleString('id-ID')}.-</span>
                         </div>
 
-                        {/* Total Bayar */}
+                        
                         <div className="flex items-center text-gray-700 font-medium text-[12px]">
                             <span className="w-[35%]">Total Bayar</span>
                             <div className="font-bold mr-1">:</div>
                             <span className="font-bold">Rp. {a.totalbyr}.-</span>
                         </div>
 
-                        {/* Thank You Message */}
+                        
                         <div className="flex flex-col text-center text-gray-700 font-medium">
                             <span className="font-normal">TERIMA KASIH</span>
                             <span className="font-normal">

@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { DataSnapshot, onValue, ref } from "firebase/database";
 import { DB } from "../../firebase-config";
 import { DataMutasiBank } from "@/types/main";
+import { BankSeparator } from "@/lib/BankSeparator";
 
 const useGetDataBank = () => {
   const [rowData, setRowData] = useState<DataMutasiBank[]>([]);
@@ -16,7 +17,9 @@ const useGetDataBank = () => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       Object.entries(dataVal).forEach(([_, transactions]) => {
         Object.entries(transactions as DataMutasiBank).forEach(([id, data]) => {
-          dataList.push({ ...data, id, lokasi });
+          const sanitizer = BankSeparator(data.bank)
+          const bank = sanitizer === "DANAMON" ? data.bank === "DANAMON" ? data.bank : `DANAMON(${data.bank})` : data.bank;
+          dataList.push({ ...data, id, lokasi, bank });
         });
       });
       return dataList;
@@ -30,7 +33,6 @@ const useGetDataBank = () => {
       return onValue(refDb, (snapshot) => {
         const newData = processData(snapshot, lokasi);
         allData = [...allData.filter((item) => item.lokasi !== lokasi), ...newData];
-
         setTotalData(allData.length);
         setRowData(allData);
       });
