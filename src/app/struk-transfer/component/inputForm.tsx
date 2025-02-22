@@ -124,6 +124,13 @@ export default function InputForm() {
             return currentSaldo - parseInt(nominal.replace(/\./g, ''));
           });
         }
+
+        /*if (sanitizerBank === "MANDIRI") {
+          const sisaSaldoBca = ref(DB, 'Datas/SaldoAwal/ValueBni');
+          await runTransaction(sisaSaldoBca, (currentSaldo) => {
+            return currentSaldo - parseInt(nominal.replace(/\./g, ''));
+          });
+        }*/
     
         if (sanitizerBank === "BRI") {
           const sisaSaldoBri = ref(DB, 'Datas/SaldoAwal/ValueBri');

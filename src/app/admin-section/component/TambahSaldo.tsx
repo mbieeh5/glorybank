@@ -2,7 +2,7 @@
 import { runTransaction, ref, push } from "firebase/database";
 import React, { useState } from "react";
 import Swal from "sweetalert2";
-import { DB } from "../../../../firebase-config";
+import { auth, DB } from "../../../../firebase-config";
 import { BankSeparator } from "@/lib/BankSeparator";
 
 export default function TambahSaldo() {
@@ -33,9 +33,11 @@ export default function TambahSaldo() {
         const capitalizeFirstLetter = sanitizerBank.charAt(0).toUpperCase() + sanitizerBank.slice(1).toLowerCase();
         const pathSaldo = `Datas/SaldoAwal/Value${capitalizeFirstLetter}`;
         const pathHistory = `History/PenambahanSaldo/${bank}/`
+        const akun = auth.currentUser?.email || 'null';
         const DataToPush = {
             SaldoTambah,
             bank,
+            akun,
             tanggal: new Date().toISOString(),
             keterangan,
         }
@@ -61,6 +63,8 @@ export default function TambahSaldo() {
               <option value="">Pilih Bank</option>
               <option value="BCA">BCA</option>
               <option value="BRI">BRI</option>
+              <option value="BNI">BRI</option>
+              <option value="MANDIRI">BRI</option>
               <option value="DANAMON">DANAMON</option>
             </select>
           </label>

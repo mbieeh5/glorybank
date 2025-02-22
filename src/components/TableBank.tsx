@@ -17,8 +17,10 @@ import {
   RowSelectionOptions,
   ValidationModule,
   CellStyleModule,
+  RowStyleModule,
   TextFilterModule,
-  DateFilterModule
+  DateFilterModule,
+  RowClassParams
 } from "ag-grid-community";
 import useGetDataBank from "@/hooks/getDataBank";
 import Swal from "sweetalert2";
@@ -35,6 +37,7 @@ ModuleRegistry.registerModules([
   ClientSideRowModelModule,
   DateFilterModule,
   CellStyleModule,
+  RowStyleModule,
   TextFilterModule,
   ValidationModule/* Development Only */,
 ]);
@@ -186,6 +189,20 @@ export default function TableBank(){
     }
   },[])
 
+ const getRowClass = (params: RowClassParams) => {
+  const status = params.data.status;
+  if(status === "LUNAS"){
+    return 'row-lunas';
+  }else if(status === "SUKSES"){
+    return 'row-sukses';
+  }else if(status === "BATAL"){
+    return 'row-batal';
+  }else if(status === "PENDING"){ 
+    return 'row-pending'
+  }
+  return ''
+ }
+
   return (
 <div className="container mx-auto p-4">
   <div className="flex flex-col h-full">
@@ -200,6 +217,7 @@ export default function TableBank(){
           rowSelection={rowSelection}
           onSelectionChanged={onSelectionChanged}
           onFilterChanged={onFilterChanged}
+          getRowClass={getRowClass}
         />
       </div>
       {selectedData.length > 0 && (
