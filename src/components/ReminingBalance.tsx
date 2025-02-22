@@ -23,6 +23,8 @@ export default function ReminingBalance() {
             const freeValue = await getFree();
             dispatch({ type: "SET_SALDO_BCA", payload: DataSaldo.ValueBca });
             dispatch({ type: "SET_SALDO_BRI", payload: DataSaldo.ValueBri });
+            dispatch({ type: "SET_SALDO_BNI", payload: DataSaldo.ValueBni });
+            dispatch({ type: "SET_SALDO_MANDIRI", payload: DataSaldo.ValueMandiri });
             dispatch({ type: "SET_SALDO_DANAMON", payload: DataSaldo.ValueDanamon });
             dispatch({ type: "SET_FREE_DANAMON", payload: parseInt(freeValue.ValueFreeDanamon)})
         }
@@ -48,7 +50,7 @@ export default function ReminingBalance() {
                     <span className="font-bold">BNI (∞)</span>
                     <span className="font-bold flex">
                         <span className="mr-2">Rp</span>
-                        <CountUp from={0} to={0} separator="," direction="up" duration={0.5} className="" />
+                        <CountUp from={0} to={state.SaldoBni} separator="," direction="up" duration={0.5} className="" />
                     </span>
                 </h3>
                 <h3 className="flex justify-between text-xl">
@@ -69,7 +71,7 @@ export default function ReminingBalance() {
                     <span className="font-bold">MANDIRI (∞)</span>
                     <span className="font-bold flex">
                         <span className="mr-2">Rp</span>
-                        <CountUp from={0} to={0} separator="," direction="up" duration={0.5} className="" />
+                        <CountUp from={0} to={state.SaldoMandiri} separator="," direction="up" duration={0.5} className="" />
                     </span>
                 </h3>
             </div>
