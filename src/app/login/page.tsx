@@ -31,7 +31,6 @@ async function handleLogin(){
                     body: JSON.stringify({
                         email: email,
                         sameSite: 'Strict',
-                        password: paswd,
                         uid: response,
                         token: Token,
                     })

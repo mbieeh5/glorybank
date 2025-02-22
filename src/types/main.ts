@@ -18,6 +18,8 @@ export interface NavItemsInterface {
 export interface ValueBank {
     ValueBca: number;
     ValueBri: number;
+    ValueBni: number;
+    ValueMandiri: number;
     ValueDanamon: number;
 }
 
@@ -57,6 +59,8 @@ export interface DataVal {
 export interface StateReminingBalance {
     SaldoBca: number,
     SaldoBri: number,
+    SaldoBni: number,
+    SaldoMandiri: number,
     SaldoDanamon: number,
     SaldoFreeDanamon: number,
     MutasiCikaret: number,
@@ -68,6 +72,8 @@ export const initialStateReminingBalance:StateReminingBalance = {
     SaldoFreeDanamon : 0,
     SaldoBca: 0,
     SaldoBri: 0,
+    SaldoBni: 0,
+    SaldoMandiri: 0,
     SaldoDanamon: 0,
     MutasiCikaret: 0,
     MutasiLainLain: 0,
@@ -77,6 +83,8 @@ export const initialStateReminingBalance:StateReminingBalance = {
 export type ActionReminingBalance = 
 | {type: "SET_SALDO_BCA"; payload: number}
 | {type: "SET_SALDO_BRI"; payload: number}
+| {type: "SET_SALDO_BNI"; payload: number}
+| {type: "SET_SALDO_MANDIRI"; payload: number}
 | {type: "SET_SALDO_DANAMON"; payload: number}
 | {type: "SET_FREE_DANAMON"; payload: number}
 | {type: "SET_MUTASI_CIKARET"; payload: number}
