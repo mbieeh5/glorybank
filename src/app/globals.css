@@ -60,6 +60,25 @@ body {
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
   }
+  .row-lunas {
+    background-color: #62FF67;
+    color: black;
+  }
+  
+  .row-sukses {
+    background-color: #4688F3;
+    color: black;
+  }
+  
+  .row-batal {
+    background-color: #E56A6A;
+    color: black;
+  }
+  
+  .row-pending {
+    background-color: #E9DD92;
+    color: black;
+  }
 }
 
 @layer base {
