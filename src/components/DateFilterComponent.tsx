@@ -4,8 +4,8 @@ const filterParams = {comparator: (filterLocalDateAtMidnight: Date, cellValue: s
     const dateParts = dateAsString.split("/");
     const cellDate = new Date(
         Number(dateParts[2]),
-        Number(dateParts[1]) - 1,
-        Number(dateParts[0])
+        Number(dateParts[1]) - 1 ,
+        Number(dateParts[0]) 
     )
     if(filterLocalDateAtMidnight.getTime() === cellDate.getTime()){
         return 0
@@ -20,7 +20,9 @@ const filterParams = {comparator: (filterLocalDateAtMidnight: Date, cellValue: s
 },
 minValidYear: 2000,
 maxValidYear: 2028,
-inRangeFloatingFilterDateFormat: "Do MMM YYYY"
+inRangeFloatingFilterDateFormat: "Do MMM YYYY",
+browserDatePicker: true, 
+inRangeInclusive: true,
 };
 
 

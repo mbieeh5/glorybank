@@ -9,10 +9,10 @@ import Loading from '@/components/Loading';
 export default function StrukLainLain() {
   
   const [nominal, setNominal] = useState<number>(10000);
-    const [admin, setAdmin] = useState<number>(0);
+    const [admin, setAdmin] = useState<number>(2000);
     const [totalByr, setTotalByr] = useState<number>(0);
     const [tanggal, setTanggal] = useState<string>("")
-    const [ isLoading, setIsLoading] = useState<boolean>(false);
+    const [ isLoading, setIsLoading]  = useState<boolean>(false);
     const router = useRouter();
 
     const formatDate = (date: Date): string => {
@@ -90,7 +90,6 @@ export default function StrukLainLain() {
 
         sessionStorage.setItem('strukDataLain', JSON.stringify(dataStruk));
         router.push('/struk-transfer/cetak/lain-lain');
-    
       } catch (error) {
         console.error("Terjadi kesalahan:", error);
       } finally {
@@ -140,6 +139,7 @@ export default function StrukLainLain() {
                 <option>DANA Pake BCA</option>
                 <option>GOPAY</option>
                 <option>GOPAY Pake BCA</option>
+                <option>PULSA</option>
                 <option>SHOPEEPAY</option>
                 <option>SHOPEEPAY Pake BCA</option>
                 <option>OVO</option>

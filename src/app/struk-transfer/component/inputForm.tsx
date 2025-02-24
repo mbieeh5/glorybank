@@ -82,7 +82,67 @@ export default function InputForm() {
         const penerima = formData.get('penerima') as string;
         const berita = (formData.get('berita') as string) || "GloryCell";
         const totalbyr = formData.get('totalbyr') as string;
+        
+        const dataUser = { bank, norek, penerima };
+        const sanitizerBank = BankSeparator(bank);
+        
+        let saldoAwal = 0;
+        let saldoAkhir = 0;
+        
+        if (sanitizerBank === "DANAMON") {
+          const sisaFreeRef = ref(DB, 'Datas/SisaFree/ValueFreeDanamon');
+          const sisaSaldoDanamon = ref(DB, 'Datas/SaldoAwal/ValueDanamon');
+          const sisaFreeSnapshot = await get(sisaFreeRef);
+          const sisaFreeValue = sisaFreeSnapshot.val();
+          saldoAwal = (await get(sisaSaldoDanamon)).val();
+          
+          await runTransaction(sisaSaldoDanamon, (currentSaldo) => {
+            set(sisaFreeRef, sisaFreeValue - 1);
+            saldoAkhir = (currentSaldo || 0) - parseInt(nominal.replace(/\./g, ''))
+            return saldoAkhir;
+          });
+        }
+        
+        if (sanitizerBank === "BCA") {
+          const sisaSaldoBca = ref(DB, 'Datas/SaldoAwal/ValueBca');
+          saldoAwal = (await get(sisaSaldoBca)).val();
+          
+          await runTransaction(sisaSaldoBca, (currentSaldo) => {
+            saldoAkhir = (currentSaldo || 0) - parseInt(nominal.replace(/\./g, ''))
+            return currentSaldo - parseInt(nominal.replace(/\./g, ''));
+          });
+        }
+        
+        if (sanitizerBank === "BNI") {
+          const sisaSaldoBni = ref(DB, 'Datas/SaldoAwal/ValueBni');
+          saldoAwal = (await get(sisaSaldoBni)).val();
+
+          await runTransaction(sisaSaldoBni, (currentSaldo) => {
+            saldoAkhir = (currentSaldo || 0) - parseInt(nominal.replace(/\./g, ''))
+            return saldoAkhir;
+          });
+        }
+
+        /*if (sanitizerBank === "MANDIRI") {
+          const sisaSaldoMandiri = ref(DB, 'Datas/SaldoAwal/ValueMandiri');
+          saldoAwal = (await get(sisaSaldoBni)).val();
+          
+          await runTransaction(sisaSaldoMandiri, (currentSaldo) => {
+            saldoAkhir = (currentSaldo || 0) - parseInt(nominal.replace(/\./g, ''))
+            return saldoAkhir;
+          });
+        }*/
     
+          if (sanitizerBank === "BRI") {
+          const sisaSaldoBri = ref(DB, 'Datas/SaldoAwal/ValueBri');
+          saldoAwal = (await get(sisaSaldoBri)).val();
+
+          await runTransaction(sisaSaldoBri, (currentSaldo) => {
+            saldoAkhir = (currentSaldo || 0) - parseInt(nominal.replace(/\./g, ''))
+            return currentSaldo - parseInt(nominal.replace(/\./g, ''));
+          });
+        }
+        
         const dataStruk = {
           tanggal: tanggal.toString(),
           lokasi,
@@ -95,50 +155,10 @@ export default function InputForm() {
           admin,
           totalbyr,
           status: 'SUKSES',
+          saldoAwal,
+          saldoAkhir,
         };
-    
-        const dataUser = { bank, norek, penerima };
-        const sanitizerBank = BankSeparator(bank);
-    
-        if (sanitizerBank === "DANAMON") {
-          const sisaFreeRef = ref(DB, 'Datas/SisaFree/ValueFreeDanamon');
-          const sisaSaldoDanamon = ref(DB, 'Datas/SaldoAwal/ValueDanamon');
-          const sisaFreeSnapshot = await get(sisaFreeRef);
-          const sisaFreeValue = sisaFreeSnapshot.val();
-          await runTransaction(sisaSaldoDanamon, (currentSaldo) => {
-            set(sisaFreeRef, sisaFreeValue - 1);
-            return currentSaldo - parseInt(nominal.replace(/\./g, ''));
-          });
-        }
-    
-        if (sanitizerBank === "BCA") {
-          const sisaSaldoBca = ref(DB, 'Datas/SaldoAwal/ValueBca');
-          await runTransaction(sisaSaldoBca, (currentSaldo) => {
-            return currentSaldo - parseInt(nominal.replace(/\./g, ''));
-          });
-        }
 
-        if (sanitizerBank === "BNI") {
-          const sisaSaldoBca = ref(DB, 'Datas/SaldoAwal/ValueBni');
-          await runTransaction(sisaSaldoBca, (currentSaldo) => {
-            return currentSaldo - parseInt(nominal.replace(/\./g, ''));
-          });
-        }
-
-        /*if (sanitizerBank === "MANDIRI") {
-          const sisaSaldoBca = ref(DB, 'Datas/SaldoAwal/ValueBni');
-          await runTransaction(sisaSaldoBca, (currentSaldo) => {
-            return currentSaldo - parseInt(nominal.replace(/\./g, ''));
-          });
-        }*/
-    
-        if (sanitizerBank === "BRI") {
-          const sisaSaldoBri = ref(DB, 'Datas/SaldoAwal/ValueBri');
-          await runTransaction(sisaSaldoBri, (currentSaldo) => {
-            return currentSaldo - parseInt(nominal.replace(/\./g, ''));
-          });
-        }
-    
         const DataUsers = ref(DB, `Datas/UserInfo/`);
         const DataMutasi = ref(DB, `Mutasi/${lokasi}/${sanitizerBank}/`);
     

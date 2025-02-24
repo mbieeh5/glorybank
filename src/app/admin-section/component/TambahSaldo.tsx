@@ -43,6 +43,7 @@ export default function TambahSaldo() {
         }
         await push(ref(DB, pathHistory), DataToPush)
         await runTransaction(ref(DB, pathSaldo), (currentSaldo) => (currentSaldo || 0) + SaldoTambah);
+        
       }
     });
   };
@@ -63,8 +64,8 @@ export default function TambahSaldo() {
               <option value="">Pilih Bank</option>
               <option value="BCA">BCA</option>
               <option value="BRI">BRI</option>
-              <option value="BNI">BRI</option>
-              <option value="MANDIRI">BRI</option>
+              <option value="BNI">BNI</option>
+              <option value="MANDIRI">MANDIRI</option>
               <option value="DANAMON">DANAMON</option>
             </select>
           </label>

@@ -1,10 +1,11 @@
 'use client'
 import React from "react";
 import CountUp from "./CountUp";
-import { DataVal, initialStateReminingBalance, ValueBank } from "@/types/main";
+import { initialStateReminingBalance, ValueBank } from "@/types/main";
 import { ReducerReminingBalance } from "@/lib/ReducerReminingBalance";
 import { DataSnapshot, get, onValue, ref } from "firebase/database";
 import { DB } from "../../firebase-config";
+import {calculateTotalsHarian} from "@/lib/CalculateTotals";
 
 export default function MutasiHarian() {
     const [state, dispatch] = React.useReducer(ReducerReminingBalance, initialStateReminingBalance);
@@ -28,34 +29,6 @@ export default function MutasiHarian() {
 
     
     React.useEffect(() => {
-        const calculateTotals = (dataVal: DataVal) => {
-            let totalNominal = 0;
-            let totalNota = 0;
-            let totalSemua = 0;
-    
-            for (const bank in dataVal) {
-                if (dataVal.hasOwnProperty(bank)) {
-                    const transactions = dataVal[bank];
-                    for (const key in transactions) {
-                        if (transactions.hasOwnProperty(key)) {
-                            const transaction = transactions[key];
-                            const isDateNow = transaction.tanggal.split("@")[0];
-                            const isSucceess = transaction.status
-                            const filters = (transaction.nominal && `${Tanggal}/${Bulan}/${Tahun}` === isDateNow) && (isSucceess === "SUKSES") ;
-                            if (filters) {
-                                const totalBayar = transaction.totalbyr || transaction.totalByr;
-                                totalNota++;
-                                totalNominal += parseInt(transaction.nominal.replace(/\./g, ''), 10);
-                                if (totalBayar) {
-                                    totalSemua += parseInt(totalBayar.replace(/\./g, ''), 10);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            return { totalNominal, totalNota, totalSemua };
-        };
         const refDb = ref(DB, 'Datas/SaldoAwal');
         const refDBFree = ref(DB, 'Datas/SisaFree');
         const refDbMutasiCikaret = ref(DB, 'Mutasi/Cikaret');
@@ -65,7 +38,7 @@ export default function MutasiHarian() {
         const getMutasiCikaret = async () => {
             const val = await get(refDbMutasiCikaret);
             const dataVal = val.val() || {};
-            const { totalNominal, totalNota, totalSemua } = calculateTotals(dataVal);
+            const { totalNominal, totalNota, totalSemua } = calculateTotalsHarian(dataVal);
             setTotalNotaCikaret(totalNota);
             setTotalSemuaCikaret(totalSemua);
             return totalNominal;
@@ -74,7 +47,7 @@ export default function MutasiHarian() {
         const getMutasiSukahati = async () => {
             const val = await get(refDbMutasiSukahati);
             const dataVal = val.val() || {};
-            const { totalNominal, totalNota, totalSemua } = calculateTotals(dataVal);
+            const { totalNominal, totalNota, totalSemua } = calculateTotalsHarian(dataVal);
             setTotalNotaSukahati(totalNota);
             setTotalSemuaSukahati(totalSemua);
             return totalNominal;
@@ -83,7 +56,7 @@ export default function MutasiHarian() {
         const getMutasiLainLain = async () => {
             const val = await get(refDbMutasiLainLain);
             const dataVal = val.val() || {};
-            const { totalNominal, totalNota, totalSemua } = calculateTotals(dataVal);
+            const { totalNominal, totalNota, totalSemua } = calculateTotalsHarian(dataVal);
             setTotalNotaLainLain(totalNota);
             setTotalSemuaLainLain(totalSemua);
             return totalNominal;
@@ -114,7 +87,7 @@ export default function MutasiHarian() {
             console.error("Error while fetching data", error);
         });
         return () => unSubs();
-    }, [Tanggal, Bulan, Tahun]);
+    }, []);
 
     return (
         <div className="flex flex-col items-center pt-6">
