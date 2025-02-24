@@ -61,22 +61,22 @@ body {
     --chart-5: 340 75% 55%;
   }
   .row-lunas {
-    background-color: #62FF67;
+    background-color: #D3FFD5;
     color: black;
   }
   
   .row-sukses {
-    background-color: #4688F3;
+    background-color: #CADDFE;
     color: black;
   }
   
   .row-batal {
-    background-color: #E56A6A;
+    background-color: #fac1c1;
     color: black;
   }
   
   .row-pending {
-    background-color: #E9DD92;
+    background-color: #FCF2B5;
     color: black;
   }
 }

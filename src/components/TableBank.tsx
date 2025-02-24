@@ -15,12 +15,14 @@ import {
   RowApiModule,
   RowSelectionModule,
   RowSelectionOptions,
+  RowAutoHeightModule,
   ValidationModule,
   CellStyleModule,
   RowStyleModule,
   TextFilterModule,
   DateFilterModule,
-  RowClassParams
+  RowClassParams,
+  ValueFormatterParams
 } from "ag-grid-community";
 import useGetDataBank from "@/hooks/getDataBank";
 import Swal from "sweetalert2";
@@ -34,6 +36,7 @@ ModuleRegistry.registerModules([
   ClientSideRowModelApiModule,
   RowSelectionModule,
   RowApiModule,
+  RowAutoHeightModule,
   ClientSideRowModelModule,
   DateFilterModule,
   CellStyleModule,
@@ -42,21 +45,28 @@ ModuleRegistry.registerModules([
   ValidationModule/* Development Only */,
 ]);
 
+function formatNumber(params: ValueFormatterParams){
+  return params.value?.toLocaleString('id-ID');
+}
+
 export default function TableBank(){
   const gridRef = useRef<AgGridReact>(null);
-  const {rowData, totalData} = useGetDataBank();
+  const { rowData, totalData, dataPerHari } = useGetDataBank();
   const [ selectedData, setSelectedData ] = useState<DataMutasiBank[]>([]);
   const [ totalDataFinal, setTotalDataFinal ] = useState<number>(0);
+  const [ dataSetter, setDataSetter ] = useState<DataMutasiBank[]>([])
 
   const [columnDefs] = useState<ColDef[]>([
-    { field: "tanggal", headerName: "TANGGAL", filter: "agDateColumnFilter", filterParams: filterParams, maxWidth: 190  },
+    { field: "tanggal", headerName: "TANGGAL", filter: "agDateColumnFilter", filterParams: filterParams, maxWidth: 190, autoHeight: true },
     { field: "lokasi",headerName: "LOKASI", filter: 'agTextColumnFilter', maxWidth: 100,  },
-    { field: "bank", headerName: "BANK", maxWidth: 180, filter: "agTextColumnFilter" },
+    { field: "bank", headerName: "BANK", maxWidth: 200, filter: "agTextColumnFilter" },
     { field: "norek", headerName: "NOREK", filter: "agTextColumnFilter",maxWidth: 160  },
     { field: "penerima", headerName: "NAMA", filter: "agTextColumnFilter"  },
+    { field: 'saldoAwal', headerName: "SALDO AWAL", valueFormatter: formatNumber },
     { field: "nominal", headerName: "NOMINAL",maxWidth: 100  },
-    { field: "admin", headerName: "ADMIN", maxWidth: 100  },
-    { field: "status", headerName: "STATUS",maxWidth: 100 }
+    { field: "saldoAkhir", headerName: "SALDO AKHIR", valueFormatter: formatNumber},
+    { field: "admin", headerName: "ADMIN", maxWidth: 100, hide: true  },
+    { field: "status", headerName: "STATUS",maxWidth: 100, filter: 'agTextColumnFilter' }
   ]);
 
   const defaultColDef = useMemo<ColDef>(() => {
@@ -183,11 +193,12 @@ export default function TableBank(){
   const maxHeightFAB = selectedData.length > 6 ? "19rem" : 'auto';
 
   const onFilterChanged = useCallback(() => {
+    setDataSetter(rowData);
     if(gridRef.current) {
       const filterCount = gridRef.current.api.getDisplayedRowCount();
       setTotalDataFinal(filterCount);
     }
-  },[])
+  },[rowData])
 
  const getRowClass = (params: RowClassParams) => {
   const status = params.data.status;
@@ -211,7 +222,7 @@ export default function TableBank(){
       <div className="ag-theme-alpine flex-grow" style={{ height: '30rem' }}>
         <AgGridReact
           ref={gridRef}
-          rowData={rowData}
+          rowData={dataSetter.length < 1 ? dataPerHari : dataSetter}
           columnDefs={columnDefs}
           defaultColDef={defaultColDef}
           rowSelection={rowSelection}

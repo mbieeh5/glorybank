@@ -7,13 +7,14 @@ import { BankSeparator } from "@/lib/BankSeparator";
 
 const useGetDataBank = () => {
   const [rowData, setRowData] = useState<DataMutasiBank[]>([]);
+  const [ dataPerHari, setDataPerHari ] = useState<DataMutasiBank[]>([]);
   const [totalData, setTotalData] = useState<number>(0);
 
   useEffect(() => {
     const processData = (snapshot: DataSnapshot, lokasi: string): DataMutasiBank[] => {
       const dataVal = snapshot.val() || {};
       const dataList: DataMutasiBank[] = [];
-      
+
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       Object.entries(dataVal).forEach(([_, transactions]) => {
         Object.entries(transactions as DataMutasiBank).forEach(([id, data]) => {
@@ -24,10 +25,10 @@ const useGetDataBank = () => {
       });
       return dataList;
     };
-
+    
     const locations = ["Cikaret", "Sukahati", "LainLain"];
     let allData: DataMutasiBank[] = [];
-
+    
     const listeners: (() => void)[] = locations.map((lokasi) => {
       const refDb = ref(DB, `Mutasi/${lokasi}`);
       return onValue(refDb, (snapshot) => {
@@ -35,15 +36,21 @@ const useGetDataBank = () => {
         allData = [...allData.filter((item) => item.lokasi !== lokasi), ...newData];
         setTotalData(allData.length);
         setRowData(allData);
+        const dataHarian = allData.filter(data => {
+          const dateNow = new Date().getDate();
+          const dateData = data.tanggal.split('@')[0].split('/')[0];
+          return dateNow === parseInt(dateData);
+        });
+        setDataPerHari(dataHarian);
       });
     });
-
+    
     return () => {
       listeners.forEach((unsubscribe) => unsubscribe());
     };
   }, []);
-
-  return { rowData, totalData };
+  
+  return { rowData, totalData, dataPerHari};
 };
 
 export default useGetDataBank;

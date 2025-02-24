@@ -41,6 +41,8 @@ export interface DataMutasiBank {
 }
 
 export interface Transaction {
+    lokasi: string;
+    admin: string;
     tanggal: string;
     status: string;
     nominal: string;
