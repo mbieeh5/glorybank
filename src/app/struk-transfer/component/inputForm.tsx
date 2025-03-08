@@ -123,15 +123,15 @@ export default function InputForm() {
           });
         }
 
-        /*if (sanitizerBank === "MANDIRI") {
+        if (sanitizerBank === "MANDIRI") {
           const sisaSaldoMandiri = ref(DB, 'Datas/SaldoAwal/ValueMandiri');
-          saldoAwal = (await get(sisaSaldoBni)).val();
+          saldoAwal = (await get(sisaSaldoMandiri)).val();
           
           await runTransaction(sisaSaldoMandiri, (currentSaldo) => {
             saldoAkhir = (currentSaldo || 0) - parseInt(nominal.replace(/\./g, ''))
             return saldoAkhir;
           });
-        }*/
+        }
     
           if (sanitizerBank === "BRI") {
           const sisaSaldoBri = ref(DB, 'Datas/SaldoAwal/ValueBri');
