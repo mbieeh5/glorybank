@@ -72,7 +72,7 @@ export default function StrukLainLain() {
             return currentSaldo - parseInt(nominal);
           });
     
-          const DataMutas = ref(DB, `Mutasi/${lokasi}/${bank}`);
+          const DataMutas = ref(DB, `Mutasi/`);
           const dataStrukMutasi = {
             tanggal: tanggal.toString(),
             bank,
@@ -140,6 +140,7 @@ export default function StrukLainLain() {
                 <option>GOPAY</option>
                 <option>GOPAY Pake BCA</option>
                 <option>PULSA</option>
+                <option>KUOTA INTERNET</option>
                 <option>SHOPEEPAY</option>
                 <option>SHOPEEPAY Pake BCA</option>
                 <option>OVO</option>

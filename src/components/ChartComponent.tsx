@@ -9,12 +9,12 @@ import { calculateTotalsGlobal } from "@/lib/CalculateTotals";
 
 export default function ChartComponent() {
     const [state, dispatch] = React.useReducer(ReducerReminingBalance, initialStateReminingBalance);
-    const [totalNotaCikaret, setTotalNotaCikaret] = React.useState<number>(0);
-    const [totalSemuaCikaret, setTotalSemuaCikaret] = React.useState<number>(0);
-    const [totalAdminCikaret, setTotalAdminCikaret] = React.useState<number>(0);
-    const [totalNotaSukahati, setTotalNotaSukahati] = React.useState<number>(0);
-    const [totalSemuaSukahati, setTotalSemuaSukahati] = React.useState<number>(0);
-    const [totalAdminSukahati, setTotalAdminSukahati] = React.useState<number>(0);
+    const [totalNotaCikaret] = React.useState<number>(0);
+    const [totalSemuaCikaret] = React.useState<number>(0);
+    const [totalAdminCikaret] = React.useState<number>(0);
+    const [totalNotaSukahati] = React.useState<number>(0);
+    const [totalSemuaSukahati] = React.useState<number>(0);
+    const [totalAdminSukahati] = React.useState<number>(0);
     const [totalCuan, setTotalCuan] = React.useState<number>(0);
     const [cuanPercentage, setCuanPercentage] = React.useState<number>(5); // Default persentase cuan
 
@@ -40,36 +40,21 @@ export default function ChartComponent() {
 
     React.useEffect(() => {
         const refDb = ref(DB, 'Datas/SaldoAwal');
-        const refDbMutasiCikaret = ref(DB, 'Mutasi/Cikaret');
-        const refDbMutasiSukahati = ref(DB, 'Mutasi/Sukahati');
+        const refDbMutasiCikaret = ref(DB, 'Mutasi/');
 
-        const getMutasiCikaret = async () => {
+        const getMutasi = async () => {
             const val = await get(refDbMutasiCikaret);
             const dataVal = val.val() || {};
-            const { totalNominal, totalNota, totalSemua, totalAdmin } = calculateTotalsGlobal(dataVal);
-            setTotalNotaCikaret(totalNota);
-            setTotalSemuaCikaret(totalSemua);
-            setTotalAdminCikaret(totalAdmin);
-            return totalNominal;
-        };
-
-        const getMutasiSukahati = async () => {
-            const val = await get(refDbMutasiSukahati);
-            const dataVal = val.val() || {};
-            const { totalNominal, totalNota, totalSemua, totalAdmin } = calculateTotalsGlobal(dataVal);
-            setTotalNotaSukahati(totalNota);
-            setTotalSemuaSukahati(totalSemua);
-            setTotalAdminSukahati(totalAdmin);
-            return totalNominal;
+            const { totals } = calculateTotalsGlobal(dataVal);
+            return totals;
         };
         
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const processRealtimeData = async (datas: DataSnapshot) => {
-            const MutasiCikaret = await getMutasiCikaret();
-            const MutasiSukahati = await getMutasiSukahati();
+            const Mutasi = await getMutasi();
 
-            dispatch({ type: "SET_MUTASI_CIKARET", payload: MutasiCikaret });
-            dispatch({ type: "SET_MUTASI_SUKAHATI", payload: MutasiSukahati });
+            dispatch({ type: "SET_MUTASI_CIKARET", payload: Mutasi.TotalNominalCikaret });
+            dispatch({ type: "SET_MUTASI_SUKAHATI", payload: Mutasi.TotalNominalSukahati });
         };
 
         const unSubs = onValue(refDb, processRealtimeData, (error) => {

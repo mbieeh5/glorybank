@@ -32,7 +32,7 @@ export default function TambahSaldo() {
         const sanitizerBank = BankSeparator(bank) || "";
         const capitalizeFirstLetter = sanitizerBank.charAt(0).toUpperCase() + sanitizerBank.slice(1).toLowerCase();
         const pathSaldo = `Datas/SaldoAwal/Value${capitalizeFirstLetter}`;
-        const pathHistory = `History/PenambahanSaldo/${bank}/`
+        const pathHistory = `History/PenambahanSaldo/`
         const akun = auth.currentUser?.email || 'null';
         const DataToPush = {
             SaldoTambah,
