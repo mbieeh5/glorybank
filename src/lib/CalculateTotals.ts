@@ -46,8 +46,7 @@ export const calculateTotalsGlobal = (dataVal: DataVal) => {
                 if (transactions.hasOwnProperty(key)) {
                     const transaction = transactions[key];
                     const isSucceess = transaction.status
-                    console.log(transaction.lokasi)
-                    const filters = (transaction.nominal) && (isSucceess !== "PENDING") && (transaction.lokasi !== "LainLain") ;
+                    const filters = (transaction.nominal) && (isSucceess === "LUNAS") && (transaction.lokasi !== "LainLain") ;
                     if (filters) {
                         const totalBayar = transaction.totalbyr || transaction.totalByr;
                         totalNota++;

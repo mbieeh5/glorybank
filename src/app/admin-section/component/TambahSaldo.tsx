@@ -49,53 +49,60 @@ export default function TambahSaldo() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
-        <h2 className="text-lg font-bold mb-4">Tambah Saldo</h2>
-        <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
-          <label>
-            BANK:
-            <select
-              value={bank}
-              onChange={(e) => setBank(e.target.value)}
-              className="form-select mt-1 block w-full"
-              required
-            >
-              <option value="">Pilih Bank</option>
-              <option value="BCA">BCA</option>
-              <option value="BRI">BRI</option>
-              <option value="BNI">BNI</option>
-              <option value="MANDIRI">MANDIRI</option>
-              <option value="DANAMON">DANAMON</option>
-            </select>
-          </label>
-          <label>
-            Penambahan:
-            <input
-              type="text"
-              value={penambahan}
-              onChange={handlePenambahanChange}
-              className="form-input mt-1 block w-full"
-              required
-            />
-          </label>
-          <label>
-            Keterangan:
-            <input
-              type="text"
-              value={keterangan}
-              onChange={(e) => setKeterangan(e.target.value)}
-              className="form-input mt-1 block w-full"
-              required
-            />
-          </label>
-          <button
-            type="submit"
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-          >
-            Tambah Saldo
-          </button>
-        </form>
+    <div className="flex items-center justify-center">
+      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg">
+      <h2 className="text-xl font-semibold text-gray-700 mb-6">TAMBAH SALDO</h2>
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div>
+        <label className="block text-sm font-medium text-gray-600 mb-1">
+          BANK:
+        </label>
+        <select
+          value={bank}
+          onChange={(e) => setBank(e.target.value)}
+          className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          required
+        >
+          <option value="">Pilih Bank</option>
+          <option value="BCA">BCA</option>
+          <option value="BRI">BRI</option>
+          <option value="BNI">BNI</option>
+          <option value="MANDIRI">MANDIRI</option>
+          <option value="DANAMON">DANAMON</option>
+          <option value="DANAMONQR">DANAMON QR</option>
+        </select>
+        </div>
+        <div>
+        <label className="block text-sm font-medium text-gray-600 mb-1">
+          Penambahan:
+        </label>
+        <input
+          type="text"
+          value={penambahan}
+          onChange={handlePenambahanChange}
+          className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          required
+        />
+        </div>
+        <div>
+        <label className="block text-sm font-medium text-gray-600 mb-1">
+          Keterangan:
+        </label>
+        <input
+          type="text"
+          value={keterangan}
+          onChange={(e) => setKeterangan(e.target.value)}
+          className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          required
+        />
+        </div>
+        <button
+        type="submit"
+        className="w-full bg-blue-500 text-white font-medium py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+        >
+        TAMBAHKAN SALDO
+        </button>
+      </form>
       </div>
     </div>
   );

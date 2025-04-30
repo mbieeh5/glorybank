@@ -222,7 +222,7 @@ export default function TableBank(){
       <div className="ag-theme-alpine flex-grow" style={{ height: '30rem' }}>
         <AgGridReact
           ref={gridRef}
-          rowData={dataSetter.length < 1 ? dataPerHari : dataSetter}
+          rowData={rowData}
           columnDefs={columnDefs}
           defaultColDef={defaultColDef}
           rowSelection={rowSelection}
