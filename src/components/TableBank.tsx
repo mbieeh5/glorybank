@@ -51,10 +51,10 @@ function formatNumber(params: ValueFormatterParams){
 
 export default function TableBank(){
   const gridRef = useRef<AgGridReact>(null);
-  const { rowData, totalData, dataPerHari } = useGetDataBank();
+  const { rowData, totalData } = useGetDataBank();
   const [ selectedData, setSelectedData ] = useState<DataMutasiBank[]>([]);
   const [ totalDataFinal, setTotalDataFinal ] = useState<number>(0);
-  const [ dataSetter, setDataSetter ] = useState<DataMutasiBank[]>([])
+ // const [ setDataSetter ] = useState<DataMutasiBank[]>([])
 
   const [columnDefs] = useState<ColDef[]>([
     { field: "tanggal", headerName: "TANGGAL", filter: "agDateColumnFilter", filterParams: filterParams, maxWidth: 190, autoHeight: true },
@@ -193,12 +193,12 @@ export default function TableBank(){
   const maxHeightFAB = selectedData.length > 6 ? "19rem" : 'auto';
 
   const onFilterChanged = useCallback(() => {
-    setDataSetter(rowData);
+    //setDataSetter(rowData);
     if(gridRef.current) {
       const filterCount = gridRef.current.api.getDisplayedRowCount();
       setTotalDataFinal(filterCount);
     }
-  },[rowData])
+  },[])
 
  const getRowClass = (params: RowClassParams) => {
   const status = params.data.status;
@@ -222,7 +222,7 @@ export default function TableBank(){
       <div className="ag-theme-alpine flex-grow" style={{ height: '30rem' }}>
         <AgGridReact
           ref={gridRef}
-          rowData={dataSetter.length < 1 ? dataPerHari : dataSetter}
+          rowData={rowData}
           columnDefs={columnDefs}
           defaultColDef={defaultColDef}
           rowSelection={rowSelection}

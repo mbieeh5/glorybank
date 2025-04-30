@@ -50,12 +50,8 @@ export interface Transaction {
     totalByr?: string;
   }
   
-export interface BankTransactions {
-    [key: string]: Transaction;
-  }
-  
 export interface DataVal {
-    [key: string]: BankTransactions;
+    [key: string]: Transaction;
   }
 
 export interface StateReminingBalance {

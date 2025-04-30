@@ -31,35 +31,19 @@ export default function MutasiHarian() {
     React.useEffect(() => {
         const refDb = ref(DB, 'Datas/SaldoAwal');
         const refDBFree = ref(DB, 'Datas/SisaFree');
-        const refDbMutasiCikaret = ref(DB, 'Mutasi/Cikaret');
-        const refDbMutasiSukahati = ref(DB, 'Mutasi/Sukahati');
-        const refDbMutasiLainLain = ref(DB, 'Mutasi/LainLain');
+        const refDBMutasi = ref(DB, 'Mutasi');
 
-        const getMutasiCikaret = async () => {
-            const val = await get(refDbMutasiCikaret);
+        const getMutasi = async () => {
+            const val = await get(refDBMutasi);
             const dataVal = val.val() || {};
-            const { totalNominal, totalNota, totalSemua } = calculateTotalsHarian(dataVal);
-            setTotalNotaCikaret(totalNota);
-            setTotalSemuaCikaret(totalSemua);
-            return totalNominal;
-        };
-
-        const getMutasiSukahati = async () => {
-            const val = await get(refDbMutasiSukahati);
-            const dataVal = val.val() || {};
-            const { totalNominal, totalNota, totalSemua } = calculateTotalsHarian(dataVal);
-            setTotalNotaSukahati(totalNota);
-            setTotalSemuaSukahati(totalSemua);
-            return totalNominal;
-        };
-
-        const getMutasiLainLain = async () => {
-            const val = await get(refDbMutasiLainLain);
-            const dataVal = val.val() || {};
-            const { totalNominal, totalNota, totalSemua } = calculateTotalsHarian(dataVal);
-            setTotalNotaLainLain(totalNota);
-            setTotalSemuaLainLain(totalSemua);
-            return totalNominal;
+            const { totals } = calculateTotalsHarian(dataVal);
+            setTotalNotaCikaret(totals.TotalNotaCikaret);
+            setTotalSemuaCikaret(totals.TotalSemuaCikaret); 
+            setTotalNotaSukahati(totals.TotalNotaSukahati);
+            setTotalSemuaSukahati(totals.TotalSemuaSukahati);  
+            setTotalNotaLainLain(totals.TotalNotaLainLain); 
+            setTotalSemuaLainLain(totals.TotalSemuaLainLain);   
+            return totals;
         };
 
         const getFree = async () => {
@@ -70,13 +54,11 @@ export default function MutasiHarian() {
         const processRealtimeData = async (datas: DataSnapshot) => {
             const DataSaldo: ValueBank = datas.val() || {};
             const freeValue = await getFree();
-            const MutasiCikaret = await getMutasiCikaret();
-            const MutasiSukahati = await getMutasiSukahati();
-            const MutasiLainLain = await getMutasiLainLain();
+            const Mutasi = await getMutasi();
 
-            dispatch({ type: "SET_MUTASI_CIKARET", payload: MutasiCikaret });
-            dispatch({ type: "SET_MUTASI_SUKAHATI", payload: MutasiSukahati });
-            dispatch({ type: "SET_MUTASI_LAIN_LAIN", payload: MutasiLainLain });
+            dispatch({ type: "SET_MUTASI_CIKARET", payload: Mutasi.TotalNominalCikaret });
+            dispatch({ type: "SET_MUTASI_SUKAHATI", payload: Mutasi.TotalNominalSukahati });
+            dispatch({ type: "SET_MUTASI_LAIN_LAIN", payload: Mutasi.TotalNominalLainLain });
             dispatch({ type: "SET_SALDO_BCA", payload: DataSaldo.ValueBca });
             dispatch({ type: "SET_SALDO_BRI", payload: DataSaldo.ValueBri });
             dispatch({ type: "SET_SALDO_DANAMON", payload: DataSaldo.ValueDanamon });

@@ -160,7 +160,7 @@ export default function InputForm() {
         };
 
         const DataUsers = ref(DB, `Datas/UserInfo/`);
-        const DataMutasi = ref(DB, `Mutasi/${lokasi}/${sanitizerBank}/`);
+        const DataMutasi = ref(DB, `Mutasi/`);
     
         await Promise.all([push(DataMutasi, dataStruk), push(DataUsers, dataUser)]);
     
