@@ -57,7 +57,8 @@ export default function PindahSaldo() {
             bank: bankA,
             akun,
             tanggal: new Date().toISOString(),
-            nama : keterangan,
+            penerima : keterangan,
+            status: "LUNAS"
         }
         
         console.log({DataToPushHistory, DataToPushMutasi, pathSaldoA, pathSaldoB, FreeBankDanamon, adminBank})

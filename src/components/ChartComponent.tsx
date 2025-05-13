@@ -16,7 +16,7 @@ export default function ChartComponent() {
     const [totalSemuaSukahati] = React.useState<number>(0);
     const [totalAdminSukahati] = React.useState<number>(0);
     const [totalCuan, setTotalCuan] = React.useState<number>(0);
-    const [cuanPercentage, setCuanPercentage] = React.useState<number>(5); // Default persentase cuan
+    const [cuanPercentage, setCuanPercentage] = React.useState<number>(5);
 
     
     React.useEffect(() => {
