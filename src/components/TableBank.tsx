@@ -31,6 +31,7 @@ import { ref, remove, runTransaction, update } from "firebase/database";
 import { auth, DB } from "../../firebase-config";
 import filterParams from "./DateFilterComponent";
 import { DataMutasiBank } from "@/types/main";
+import { useRouter } from "next/navigation";
 
 ModuleRegistry.registerModules([
   ClientSideRowModelApiModule,
@@ -51,10 +52,11 @@ function formatNumber(params: ValueFormatterParams){
 
 export default function TableBank(){
   const gridRef = useRef<AgGridReact>(null);
-  const { rowData, totalData } = useGetDataBank();
+  const { rowData, totalData, dataPerHari } = useGetDataBank();
   const [ selectedData, setSelectedData ] = useState<DataMutasiBank[]>([]);
   const [ totalDataFinal, setTotalDataFinal ] = useState<number>(0);
- // const [ setDataSetter ] = useState<DataMutasiBank[]>([])
+  const [ dataSetter, setDataSetter] = useState<DataMutasiBank[]>([]);
+  const router = useRouter();
 
   const [columnDefs] = useState<ColDef[]>([
     { field: "tanggal", headerName: "TANGGAL", filter: "agDateColumnFilter", filterParams: filterParams, maxWidth: 190, autoHeight: true },
@@ -92,6 +94,16 @@ export default function TableBank(){
         })
       }
 
+      if(newStatus.includes("CETAK") && selected.length > 1){
+        return Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'CETAK KEMBALI HANYA DAPAT DI PILIH SATU DATA',
+        })
+      }
+
+      
+      
       if(koreksiJikaStatusSama.includes(newStatus)){
         return Swal.fire({
           icon: 'error',
@@ -107,11 +119,16 @@ export default function TableBank(){
           text: 'Transaksi Sukses/Lunas Dan Pending Tidak Dapat di Hapus',
         })
       }
-
+      
       const updatedData = selected.map(item => ({
         ...item,
         status: newStatus
       }));
+
+      if(newStatus.includes("CETAK")){
+        sessionStorage.setItem('strukData', JSON.stringify(updatedData[0]));
+        return router.push('/struk-transfer/cetak');
+      }
       
       const result = await Swal.fire({
         title: 'Apakah Anda yakin?',
@@ -132,7 +149,7 @@ export default function TableBank(){
         updatedData.forEach(async item => {
           const itemToUpdate = {[item.id] : item}
           const sanitizerBank = BankSeparator(item.bank) || "";
-          const path = `Mutasi/${item.lokasi}/${sanitizerBank}/`;
+          const path = `Mutasi/`;
           const capitalizeFirstLetter = sanitizerBank.charAt(0).toUpperCase() + sanitizerBank.slice(1).toLowerCase();
           const pathSaldo = `Datas/SaldoAwal/Value${capitalizeFirstLetter}`;
           const akun = auth.currentUser?.email;
@@ -140,12 +157,12 @@ export default function TableBank(){
           const testingUpdateData = {[item.id] : {...item, akun, tanggalStatus}}
 
             if(newStatus === "SUKSES"){
-              await update(ref(DB, 'History/Mutasi/'),testingUpdateData)
+              await update(ref(DB, 'History/'),testingUpdateData)
               await runTransaction(ref(DB, pathSaldo), (currentSaldo) => (currentSaldo || 0) - parseInt(item.nominal.replace(/\./g,""), 10));
             }
 
             if(newStatus === "BATAL" || newStatus === "PENDING"){
-              await update(ref(DB, 'History/Mutasi/'),testingUpdateData)
+              await update(ref(DB, 'History/'),testingUpdateData)
               await runTransaction(ref(DB, pathSaldo), (currentSaldo) => (currentSaldo || 0) + parseInt(item.nominal.replace(/\./g,""), 10));
             }
 
@@ -173,32 +190,42 @@ export default function TableBank(){
         text: '',
       })
     }
-  }, []);
+  }, [router]);
 
   const onSelectionChanged = useCallback(() => {
-    if(!gridRef.current) return;
-    //const selectedRows = gridRef.current.api.getSelectedRows();
-    const selectedRows = gridRef.current.api.getRenderedNodes().filter(node => node.isSelected()).map(node => node.data);
+    if (!gridRef.current) return;
+    const selectedNodes = gridRef.current.api.getSelectedNodes();
+    const selectedRows = selectedNodes.map(node => {return { ...node.data }});
     setSelectedData(selectedRows);
-  }, [])
+  }, []);
 
   const TotalNominal = useMemo(() => {
-    return selectedData.reduce((sum, item) => sum + parseInt(item.nominal.replace(/\./g, ""), 10), 0);
+    return selectedData.reduce((sum, item) => {
+      const nominal = typeof item.nominal === "string" 
+        ? parseInt(item.nominal.replace(/\./g, ""), 10) 
+        : item.nominal || 0;
+      return sum + nominal;
+    }, 0);
   },[selectedData])
 
   const totalAdmin = useMemo(() => {
-    return selectedData.reduce((sum, item) => sum + (item.admin ? parseInt(item.admin.replace(/\./g, ""), 10) : 0), 0);
+    return selectedData.reduce((sum, item) => {
+      const adminValue = typeof item.admin === "string" 
+        ? parseInt(item.admin.replace(/\./g, ""), 10) 
+        : item.admin || 0;
+      return sum + adminValue;
+    }, 0);
   },[selectedData])
 
   const maxHeightFAB = selectedData.length > 6 ? "19rem" : 'auto';
 
   const onFilterChanged = useCallback(() => {
-    //setDataSetter(rowData);
     if(gridRef.current) {
       const filterCount = gridRef.current.api.getDisplayedRowCount();
       setTotalDataFinal(filterCount);
+      setDataSetter(rowData);
     }
-  },[])
+  },[rowData])
 
  const getRowClass = (params: RowClassParams) => {
   const status = params.data.status;
@@ -222,7 +249,7 @@ export default function TableBank(){
       <div className="ag-theme-alpine flex-grow" style={{ height: '30rem' }}>
         <AgGridReact
           ref={gridRef}
-          rowData={rowData}
+          rowData={dataSetter.length > 0 ? dataSetter : dataPerHari}
           columnDefs={columnDefs}
           defaultColDef={defaultColDef}
           rowSelection={rowSelection}
@@ -291,6 +318,11 @@ export default function TableBank(){
               TANDAI PENDING
             </button>
             <button 
+              className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mb-2" 
+              onClick={() => updateItems("CETAK")}>
+              CETAK KEMBALI NOTA
+            </button>
+            <button 
               className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded mb-2" 
               onClick={() => updateItems("BATAL")}>
               BATALKAN
@@ -326,6 +358,11 @@ export default function TableBank(){
               className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded mb-2" 
               onClick={() => updateItems("PENDING")}>
               TANDAI PENDING
+            </button>
+            <button 
+              className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mb-2" 
+              onClick={() => updateItems("CETAK")}>
+              CETAK KEMBALI NOTA
             </button>
             <button 
               className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded mb-2" 

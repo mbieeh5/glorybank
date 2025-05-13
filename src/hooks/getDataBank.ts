@@ -11,39 +11,38 @@ const useGetDataBank = () => {
   const [totalData, setTotalData] = useState<number>(0);
 
   useEffect(() => {
-    const processData = (snapshot: DataSnapshot, lokasi: string): DataMutasiBank[] => {
+    const processData = (snapshot: DataSnapshot): DataMutasiBank[] => {
       const dataVal = snapshot.val() || {};
       const dataList: DataMutasiBank[] = [];
 
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      Object.entries(dataVal).forEach(([_, transactions]) => {
-        Object.entries(transactions as DataMutasiBank).forEach(([id, data]) => {
-          const sanitizer = BankSeparator(data.bank)
-          const bank = sanitizer === "DANAMON" ? data.bank === "DANAMON" ? data.bank : `DANAMON(${data.bank})` : data.bank;
-          dataList.push({ ...data, id, lokasi, bank });
-        });
-      });
+     Object.entries(dataVal as Record<string, DataMutasiBank>).forEach(([key, data]: [string, DataMutasiBank]) => {
+      const sanitizer = BankSeparator(data.bank);
+      const bank = sanitizer === "DANAMON" ? (data.bank === "DANAMON" ? data.bank : `DANAMON(${data.bank})`) : data.bank;
+      const tanggal = new Date(data.tanggal);
+      const tanggalFinal = isNaN(tanggal.getTime()) ? data.tanggal : `${tanggal.getDate() < 10 ? `0${tanggal.getDate()}` : tanggal.getDate()}/${tanggal.getMonth() + 1 < 10 ? `0${tanggal.getMonth() + 1}` : tanggal.getMonth() + 1}/${tanggal.getFullYear()}@${tanggal.getHours() < 10 ? `0${tanggal.getHours()}` : tanggal.getHours()}:${tanggal.getMinutes() < 10 ? `0${tanggal.getMinutes()}` : tanggal.getMinutes()}:${tanggal.getSeconds() < 10 ? `0${tanggal.getSeconds()}` : tanggal.getSeconds()}`;
+      const id = key;
+      dataList.push({ ...data, id, tanggal: tanggalFinal, bank });
+     })
       return dataList;
-    };
-    
-    const locations = ["Cikaret", "Sukahati", "LainLain"];
+  };
+  
     let allData: DataMutasiBank[] = [];
     
-    const listeners: (() => void)[] = locations.map((lokasi) => {
-      const refDb = ref(DB, `Mutasi/${lokasi}`);
-      return onValue(refDb, (snapshot) => {
-        const newData = processData(snapshot, lokasi);
-        allData = [...allData.filter((item) => item.lokasi !== lokasi), ...newData];
-        setTotalData(allData.length);
-        setRowData(allData);
-        const dataHarian = allData.filter(data => {
-          const dateNow = new Date().getDate();
-          const dateData = data.tanggal.split('@')[0].split('/')[0];
-          return dateNow === parseInt(dateData);
-        });
-        setDataPerHari(dataHarian);
+    const listeners: (() => void)[] = [];
+    const refDb = ref(DB, `Mutasi`);
+    const unsubscribe = onValue(refDb, (snapshot) => {
+      const newData = processData(snapshot);
+      allData = [...allData.filter((item) => item), ...newData];
+      setRowData(allData);
+      const dataHarian = allData.filter(data => {
+        const now = new Date();
+        const [day, month] = data.tanggal.split('@')[0].split('/').map(Number);
+        return now.getDate() === day && (now.getMonth() + 1) === month;
       });
+      setTotalData(dataHarian.length);
+      setDataPerHari(dataHarian);
     });
+    listeners.push(unsubscribe);
     
     return () => {
       listeners.forEach((unsubscribe) => unsubscribe());
