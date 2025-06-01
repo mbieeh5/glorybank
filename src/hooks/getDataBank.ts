@@ -4,6 +4,7 @@ import { DataSnapshot, onValue, ref } from "firebase/database";
 import { DB } from "../../firebase-config";
 import { DataMutasiBank } from "@/types/main";
 import { BankSeparator } from "@/lib/BankSeparator";
+import { DateCorector } from "@/lib/DateCorector";
 
 const useGetDataBank = () => {
   const [rowData, setRowData] = useState<DataMutasiBank[]>([]);
@@ -18,8 +19,7 @@ const useGetDataBank = () => {
      Object.entries(dataVal as Record<string, DataMutasiBank>).forEach(([key, data]: [string, DataMutasiBank]) => {
       const sanitizer = BankSeparator(data.bank);
       const bank = sanitizer === "DANAMON" ? (data.bank === "DANAMON" ? data.bank : `DANAMON(${data.bank})`) : data.bank;
-      const tanggal = new Date(data.tanggal);
-      const tanggalFinal = isNaN(tanggal.getTime()) ? data.tanggal : `${tanggal.getDate() < 10 ? `0${tanggal.getDate()}` : tanggal.getDate()}/${tanggal.getMonth() + 1 < 10 ? `0${tanggal.getMonth() + 1}` : tanggal.getMonth() + 1}/${tanggal.getFullYear()}@${tanggal.getHours() < 10 ? `0${tanggal.getHours()}` : tanggal.getHours()}:${tanggal.getMinutes() < 10 ? `0${tanggal.getMinutes()}` : tanggal.getMinutes()}:${tanggal.getSeconds() < 10 ? `0${tanggal.getSeconds()}` : tanggal.getSeconds()}`;
+      const tanggalFinal = DateCorector(data.tanggal);
       const id = key;
       dataList.push({ ...data, id, tanggal: tanggalFinal, bank });
      })
