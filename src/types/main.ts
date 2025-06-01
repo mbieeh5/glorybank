@@ -21,6 +21,7 @@ export interface ValueBank {
     ValueBni: number;
     ValueMandiri: number;
     ValueDanamon: number;
+    ValueDanamonqr: number;
 }
 
 export interface DropDownTotalanProps {
@@ -60,7 +61,9 @@ export interface StateReminingBalance {
     SaldoBni: number,
     SaldoMandiri: number,
     SaldoDanamon: number,
+    SaldoDanamonQR: number, 
     SaldoFreeDanamon: number,
+    SaldoFreeDanamonQR: number,
     MutasiCikaret: number,
     MutasiLainLain: number,
     MutasiSukahati: number
@@ -68,11 +71,13 @@ export interface StateReminingBalance {
 
 export const initialStateReminingBalance:StateReminingBalance = {
     SaldoFreeDanamon : 0,
+    SaldoFreeDanamonQR: 0, 
     SaldoBca: 0,
     SaldoBri: 0,
     SaldoBni: 0,
     SaldoMandiri: 0,
     SaldoDanamon: 0,
+    SaldoDanamonQR: 0,
     MutasiCikaret: 0,
     MutasiLainLain: 0,
     MutasiSukahati: 0
@@ -84,6 +89,8 @@ export type ActionReminingBalance =
 | {type: "SET_SALDO_BNI"; payload: number}
 | {type: "SET_SALDO_MANDIRI"; payload: number}
 | {type: "SET_SALDO_DANAMON"; payload: number}
+| {type: "SET_SALDO_DANAMON_QR"; payload: number}
+| {type: "SET_FREE_DANAMON_QR"; payload: number}
 | {type: "SET_FREE_DANAMON"; payload: number}
 | {type: "SET_MUTASI_CIKARET"; payload: number}
 | {type: "SET_MUTASI_LAIN_LAIN"; payload: number}

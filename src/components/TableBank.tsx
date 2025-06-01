@@ -59,9 +59,9 @@ export default function TableBank(){
   const router = useRouter();
 
   const [columnDefs] = useState<ColDef[]>([
-    { field: "tanggal", headerName: "TANGGAL", filter: "agDateColumnFilter", filterParams: filterParams, maxWidth: 190, autoHeight: true },
+    { field: "tanggal", headerName: "TANGGAL", filter: "agDateColumnFilter", filterParams: filterParams, maxWidth: 190, autoHeight: true, sortable: true, sort: 'asc' },
     { field: "lokasi",headerName: "LOKASI", filter: 'agTextColumnFilter', maxWidth: 100,  },
-    { field: "bank", headerName: "BANK", maxWidth: 200, filter: "agTextColumnFilter" },
+    { field: "bank", headerName: "BANK", maxWidth: 200, filter: "agTextColumnFilter", },
     { field: "norek", headerName: "NOREK", filter: "agTextColumnFilter",maxWidth: 160  },
     { field: "penerima", headerName: "NAMA", filter: "agTextColumnFilter"  },
     { field: 'saldoAwal', headerName: "SALDO AWAL", valueFormatter: formatNumber },
@@ -148,6 +148,7 @@ export default function TableBank(){
       if(result.isConfirmed){
         updatedData.forEach(async item => {
           const itemToUpdate = {[item.id] : item}
+        
           const sanitizerBank = BankSeparator(item.bank) || "";
           const path = `Mutasi/`;
           const capitalizeFirstLetter = sanitizerBank.charAt(0).toUpperCase() + sanitizerBank.slice(1).toLowerCase();
@@ -163,7 +164,12 @@ export default function TableBank(){
 
             if(newStatus === "BATAL" || newStatus === "PENDING"){
               await update(ref(DB, 'History/'),testingUpdateData)
-              await runTransaction(ref(DB, pathSaldo), (currentSaldo) => (currentSaldo || 0) + parseInt(item.nominal.replace(/\./g,""), 10));
+                await runTransaction(ref(DB, pathSaldo), (currentSaldo) => {
+                const nominalValue = typeof item.nominal === "string" 
+                  ? parseInt(item.nominal.replace(/\./g, ""), 10) 
+                  : item.nominal || 0;
+                return (currentSaldo || 0) + nominalValue;
+                });
             }
 
             if(newStatus === "HAPUS"){
@@ -246,7 +252,7 @@ export default function TableBank(){
   <div className="flex flex-col h-full">
       <h2 className="text-xl font-bold text-center">TOTAL NOTA : {totalDataFinal === 0 ? totalData : totalDataFinal}</h2>
       <div className="flex flex-grow mt-7 relative lg:flex-row flex-col">
-      <div className="ag-theme-alpine flex-grow" style={{ height: '30rem' }}>
+      <div className="ag-theme-alpine flex-grow" style={{ height: '45rem' }}>
         <AgGridReact
           ref={gridRef}
           rowData={dataSetter.length > 0 ? dataSetter : dataPerHari}

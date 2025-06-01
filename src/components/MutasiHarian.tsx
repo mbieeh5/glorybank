@@ -6,6 +6,7 @@ import { ReducerReminingBalance } from "@/lib/ReducerReminingBalance";
 import { DataSnapshot, get, onValue, ref } from "firebase/database";
 import { DB } from "../../firebase-config";
 import {calculateTotalsHarian} from "@/lib/CalculateTotals";
+import CardComponentBalance from "./CardBalance";
 
 export default function MutasiHarian() {
     const [state, dispatch] = React.useReducer(ReducerReminingBalance, initialStateReminingBalance);
@@ -74,76 +75,76 @@ export default function MutasiHarian() {
     return (
         <div className="flex flex-col items-center pt-6">
             <h1 className="font-bold text-2xl mb-6">Mutasi {Tanggal}/{Bulan}/{Tahun}</h1>
-            <div className="w-64 space-y-4">
+            <CardComponentBalance>
                 {/* Cikaret */}
-                <div onClick={handleOnMutasiCikaret} className="cursor-pointer">
-                    <h3 className="flex justify-between text-xl">
-                        <span className="font-bold">CIKARET</span>
-                        <span className="font-bold flex">
+                <div onClick={handleOnMutasiCikaret} className="cursor-pointer bg-white shadow-md rounded-lg p-4 mb-4 hover:shadow-lg transition-shadow">
+                    <h3 className="flex justify-between text-xl font-bold text-gray-800">
+                        <span>CIKARET</span>
+                        <span className="flex items-center text-green-600">
                             <span className="mr-2">Rp</span>
                             <CountUp from={0} to={state.MutasiCikaret} separator="," direction="up" duration={0.5} />
                         </span>
                     </h3>
                     {isShowCikaret && (
-                        <div className="pl-4">
-                            <h3 className="flex justify-between text-l">
+                        <div className="mt-1 text-gray-600">
+                            <p className="flex justify-between p-1">
                                 <span>- TOTAL</span>
                                 <span>{totalNotaCikaret} Nota</span>
-                            </h3>
-                            <h3 className="flex justify-between text-l">
+                            </p>
+                            <p className="flex justify-between p-1">
                                 <span>- TOTAL UANG</span>
                                 <span>Rp {totalSemuaCikaret.toLocaleString('id-ID')}</span>
-                            </h3>
+                            </p>
                         </div>
                     )}
                 </div>
 
                 {/* Sukahati */}
-                <div onClick={handleOnMutasiSukahati} className="cursor-pointer">
-                    <h3 className="flex justify-between text-xl">
-                        <span className="font-bold">SUKAHATI</span>
-                        <span className="font-bold flex">
+                <div onClick={handleOnMutasiSukahati} className="cursor-pointer bg-white shadow-md rounded-lg p-4 mb-4 hover:shadow-lg transition-shadow">
+                    <h3 className="flex justify-between text-xl font-bold text-gray-800">
+                        <span>SUKAHATI</span>
+                        <span className="flex items-center text-blue-600">
                             <span className="mr-2">Rp</span>
                             <CountUp from={0} to={state.MutasiSukahati} separator="," direction="up" duration={0.5} />
                         </span>
                     </h3>
                     {isShowSukahati && (
-                        <div className="pl-4">
-                            <h3 className="flex justify-between text-l">
+                        <div className="mt-1 text-gray-600">
+                            <p className="flex justify-between p-1">
                                 <span>- TOTAL</span>
                                 <span>{totalNotaSukahati} Nota</span>
-                            </h3>
-                            <h3 className="flex justify-between text-l">
+                            </p>
+                            <p className="flex justify-between p-1">
                                 <span>- TOTAL UANG</span>
                                 <span>Rp {totalSemuaSukahati.toLocaleString('id-ID')}</span>
-                            </h3>
+                            </p>
                         </div>
                     )}
                 </div>
 
                 {/* Lain Lain */}
-                <div onClick={handleOnMutasiLainLain} className="cursor-pointer">
-                    <h3 className="flex justify-between text-xl">
-                        <span className="font-bold">LAIN LAIN</span>
-                        <span className="font-bold flex">
+                <div onClick={handleOnMutasiLainLain} className="cursor-pointer bg-white shadow-md rounded-lg p-4 mb-4 hover:shadow-lg transition-shadow">
+                    <h3 className="flex justify-between text-xl font-bold text-gray-800">
+                        <span>LAIN LAIN</span>
+                        <span className="flex items-center text-red-600">
                             <span className="mr-2">Rp</span>
                             <CountUp from={0} to={state.MutasiLainLain} separator="," direction="up" duration={0.5} />
                         </span>
                     </h3>
                     {isShowLainLain && (
-                        <div className="pl-4">
-                            <h3 className="flex justify-between text-l">
+                        <div className="mt-1 text-gray-600">
+                            <h3 className="flex justify-between p-1">
                                 <span>- TOTAL</span>
                                 <span>{totalNotaLainLain} Nota</span>
                             </h3>
-                            <h3 className="flex justify-between text-l">
+                            <h3 className="flex justify-between p-1">
                                 <span>- TOTAL UANG</span>
                                 <span>Rp {totalSemuaLainLain.toLocaleString('id-ID')}</span>
                             </h3>
                         </div>
                     )}
                 </div>
-            </div>
+            </CardComponentBalance>
         </div>
     );
 }

@@ -5,6 +5,7 @@ import { initialStateReminingBalance, ValueBank } from "@/types/main";
 import { ReducerReminingBalance } from "@/lib/ReducerReminingBalance";
 import { DataSnapshot, get, onValue, ref } from "firebase/database";
 import { DB } from "../../firebase-config";
+import CardComponentBalance from "./CardBalance";
 
 
 
@@ -26,7 +27,9 @@ export default function ReminingBalance() {
             dispatch({ type: "SET_SALDO_BNI", payload: DataSaldo.ValueBni });
             dispatch({ type: "SET_SALDO_MANDIRI", payload: DataSaldo.ValueMandiri });
             dispatch({ type: "SET_SALDO_DANAMON", payload: DataSaldo.ValueDanamon });
+            dispatch({ type: "SET_SALDO_DANAMON_QR", payload: DataSaldo.ValueDanamonqr})
             dispatch({ type: "SET_FREE_DANAMON", payload: parseInt(freeValue.ValueFreeDanamon)})
+            dispatch({ type: "SET_FREE_DANAMON_QR", payload: parseInt(freeValue.ValueFreeDanamonqr)})
         }
 
         const unSubs = onValue(refDb, processRealtimeData, (error) => {
@@ -37,44 +40,57 @@ export default function ReminingBalance() {
 
     return (
         <div className="flex flex-col items-center pt-6">
-            <h1 className="font-bold text-2xl mb-6">SISA SALDO</h1>
-            <div className="w-72">
-                <h3 className="flex justify-between text-xl">
-                    <span className="font-bold">BCA (∞)</span>
-                    <span className="font-bold flex">
-                        <span className="mr-2">Rp</span> 
-                        <CountUp from={0} to={state.SaldoBca} separator="," direction="up" duration={0.5} className="" />
-                    </span>
-                </h3>
-                <h3 className="flex justify-between text-xl">
-                    <span className="font-bold">BNI (∞)</span>
-                    <span className="font-bold flex">
-                        <span className="mr-2">Rp</span>
-                        <CountUp from={0} to={state.SaldoBni} separator="," direction="up" duration={0.5} className="" />
-                    </span>
-                </h3>
-                <h3 className="flex justify-between text-xl">
-                    <span className="font-bold">BRI (∞)</span>
-                    <span className="font-bold flex">
-                        <span className="mr-2">Rp</span>
-                        <CountUp from={0} to={state.SaldoBri} separator="," direction="up" duration={0.5} className="" />
-                    </span>
-                </h3>
-                <h3 className="flex justify-between text-xl">
-                    <span className="font-bold">DANAMON (<CountUp from={0} to={state.SaldoFreeDanamon} separator="," direction="up" duration={0.5} className="" />)</span>
-                    <span className="font-bold flex">
-                        <span className="mr-2">Rp</span>
-                        <CountUp from={0} to={state.SaldoDanamon} separator="," direction="up" duration={0.5} className="" />
-                    </span>
-                </h3>
-                <h3 className="flex justify-between text-xl">
-                    <span className="font-bold">MANDIRI (∞)</span>
-                    <span className="font-bold flex">
-                        <span className="mr-2">Rp</span>
-                        <CountUp from={0} to={state.SaldoMandiri} separator="," direction="up" duration={0.5} className="" />
-                    </span>
-                </h3>
-            </div>
+                <CardComponentBalance>
+                    <h1 className="font-bold text-3xl mb-8 text-center text-gray-800">SISA SALDO</h1>
+                    <div className="space-y-1 w-full">
+                        <div className="flex justify-between items-center text-lg bg-gray-100 p-2 rounded-lg shadow-sm">
+                            <span className="font-semibold text-gray-700">BCA (∞)</span>
+                            <span className="font-bold text-gray-900 flex items-center">
+                                <span className="mr-2 text-gray-500">Rp</span>
+                                <CountUp from={0} to={state.SaldoBca} separator="," direction="up" duration={0.5} />
+                            </span>
+                        </div>
+                        <div className="flex justify-between items-center text-lg bg-gray-100 p-2 rounded-lg shadow-sm">
+                            <span className="font-semibold text-gray-700">BNI (∞)</span>
+                            <span className="font-bold text-gray-900 flex items-center">
+                                <span className="mr-2 text-gray-500">Rp</span>
+                                <CountUp from={0} to={state.SaldoBni} separator="," direction="up" duration={0.5} />
+                            </span>
+                        </div>
+                        <div className="flex justify-between items-center text-lg bg-gray-100 p-2 rounded-lg shadow-sm">
+                            <span className="font-semibold text-gray-700">BRI (∞)</span>
+                            <span className="font-bold text-gray-900 flex items-center">
+                                <span className="mr-2 text-gray-500">Rp</span>
+                                <CountUp from={0} to={state.SaldoBri} separator="," direction="up" duration={0.5} />
+                            </span>
+                        </div>
+                        <div className="flex justify-between items-center text-lg bg-gray-100 p-2 rounded-lg shadow-sm">
+                            <span className="font-semibold text-gray-700">
+                                DANAMON (<CountUp from={0} to={state.SaldoFreeDanamon} separator="," direction="up" duration={0.5} />)
+                            </span>
+                            <span className="font-bold text-gray-900 flex items-center">
+                                <span className="mr-2 text-gray-500">Rp</span>
+                                <CountUp from={0} to={state.SaldoDanamon} separator="," direction="up" duration={0.5} />
+                            </span>
+                        </div>
+                        <div className="flex justify-between items-center text-lg bg-gray-100 p-2 rounded-lg shadow-sm">
+                            <span className="font-semibold text-gray-700">
+                                DANAMON QR (<CountUp from={0} to={state.SaldoFreeDanamonQR} separator="," direction="up" duration={0.5} />)
+                            </span>
+                            <span className="font-bold text-gray-900 flex items-center">
+                                <span className="mr-2 text-gray-500">Rp</span>
+                                <CountUp from={0} to={state.SaldoDanamonQR} separator="," direction="up" duration={0.5} />
+                            </span>
+                        </div>
+                        <div className="flex justify-between items-center text-lg bg-gray-100 p-2 rounded-lg shadow-sm">
+                            <span className="font-semibold text-gray-700">MANDIRI (∞)</span>
+                            <span className="font-bold text-gray-900 flex items-center">
+                                <span className="mr-2 text-gray-500">Rp</span>
+                                <CountUp from={0} to={state.SaldoMandiri} separator="," direction="up" duration={0.5} />
+                            </span>
+                        </div>
+                    </div>
+                </CardComponentBalance>
         </div>
     );
 }
