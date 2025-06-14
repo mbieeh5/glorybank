@@ -25,17 +25,14 @@ const useGetDataBank = () => {
      })
       return dataList;
   };
-  
-    let allData: DataMutasiBank[] = [];
     
     const listeners: (() => void)[] = [];
     const refDb = ref(DB, `Mutasi`);
     const unsubscribe = onValue(refDb, (snapshot) => {
       const newData = processData(snapshot);
-      allData = [...allData.filter((item) => item), ...newData];
-      setRowData(allData);
-      const dataHarian = allData.filter(data => {
-        const now = new Date();
+      setRowData(newData);
+      const now = new Date();
+      const dataHarian = newData.filter(data => {
         const [day, month] = data.tanggal.split('@')[0].split('/').map(Number);
         return now.getDate() === day && (now.getMonth() + 1) === month;
       });
