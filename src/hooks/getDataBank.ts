@@ -23,6 +23,7 @@ const useGetDataBank = () => {
       const id = key;
       dataList.push({ ...data, id, tanggal: tanggalFinal, bank });
      })
+      //console.log("ID:",dataList.map(data => data.id),"nominal:",dataList.map(data => data.nominal));
       return dataList;
   };
     

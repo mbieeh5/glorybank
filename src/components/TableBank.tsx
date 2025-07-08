@@ -65,7 +65,7 @@ export default function TableBank(){
     { field: "norek", headerName: "NOREK", filter: "agTextColumnFilter",maxWidth: 160  },
     { field: "penerima", headerName: "NAMA", filter: "agTextColumnFilter"  },
     { field: 'saldoAwal', headerName: "SALDO AWAL", valueFormatter: formatNumber },
-    { field: "nominal", headerName: "NOMINAL",maxWidth: 100  },
+    { field: "nominal", headerName: "NOMINAL",maxWidth: 100 , valueFormatter: formatNumber },
     { field: "saldoAkhir", headerName: "SALDO AKHIR", valueFormatter: formatNumber},
     { field: "admin", headerName: "ADMIN", maxWidth: 100, hide: true  },
     { field: "status", headerName: "STATUS",maxWidth: 100, filter: 'agTextColumnFilter' }
@@ -202,6 +202,7 @@ export default function TableBank(){
     if (!gridRef.current) return;
     const selectedNodes = gridRef.current.api.getSelectedNodes();
     const selectedRows = selectedNodes.map(node => {return { ...node.data }});
+    //console.log("Selected Rows:", selectedRows);
     setSelectedData(selectedRows);
   }, []);
 
