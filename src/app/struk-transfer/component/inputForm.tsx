@@ -5,6 +5,7 @@ import { DB } from '../../../../firebase-config';
 import { get, push, ref, runTransaction, set } from 'firebase/database';
 import { BankSeparator } from '@/lib/BankSeparator';
 import Loading from '@/components/Loading';
+import Swal from 'sweetalert2';
 
 
 export default function InputForm() {
@@ -14,176 +15,170 @@ export default function InputForm() {
     const [penerima, setPenerima] = useState<string>('');
     const [admin, setAdmin] = useState<string>('0');
     const [totalByr, setTotalByr] = useState<number>(0);
-    const [tanggal, setTanggal] = useState<string>("")
+    const [tanggal , setTanggal] = useState<string>("")
     const [lokasi, setLokasi] = useState<string>('Cikaret');
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const router = useRouter();
 
-    const formatDate = (date: Date): string => {
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const year = date.getFullYear();
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        const seconds = String(date.getSeconds()).padStart(2, '0');
-        
-        return `${day}/${month}/${year}@${hours}:${minutes}:${seconds}`;
-    };
+// 🔧 Helper Functions
+const formatDate = (date: Date): string => {
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
 
-    const handleNominalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const rawValue = e.target.value.replace(/\./g, '');
-      const formattedValue = parseInt(rawValue || "0").toLocaleString('id-ID');
-      setNominal(formattedValue)
+  return `${day}/${month}/${year}@${hours}:${minutes}:${seconds}`;
+};
+function capitalizeFirstLetter(text: string):string {
+  return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+};
+const parseRupiah = (value: string): number => parseInt(value.replace(/\./g, '') || '0');
+const handleNominalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const rawValue = e.target.value.replace(/\./g, '');
+  const formattedValue = parseInt(rawValue || "0").toLocaleString('id-ID');
+  setNominal(formattedValue);
+};
+const calculation = useCallback((num: number) => {
+  const ranges = [
+    { max: 500_000, fee: 5_000 },
+    { max: 1_000_000, fee: 10_000 },
+    { max: 3_000_000, fee: 15_000 },
+    { max: 5_000_000, fee: 20_000 },
+    { max: 10_000_000, fee: 25_000 },
+  ];
+
+  for (const range of ranges) {
+    if (num <= range.max) {
+      setAdmin(range.fee.toLocaleString('id-ID'));
+      setTotalByr(range.fee + num);
+      return;
     }
+  }
 
-    const calculation = useCallback((num: number) => {
-        if(num <= 500000){
-            setAdmin('5.000');
-            setTotalByr(5000 + num);
-            return;
-        }
-        if(num <= 1000000){
-            setAdmin('10.000');
-            setTotalByr(10000 + num);
-            return;
-        }
-        if(num <= 3000000){
-            setAdmin('15.000');
-            setTotalByr(15000 + num);
-            return;
-        }
-        if(num <= 5000000){
-            setAdmin('20.000');
-            setTotalByr(20000 + num);
-            return;
-        }
-        if(num <= 10000000){
-            setAdmin('25.000');
-            setTotalByr(25000 + num);
-            return;
-        }
-        const cleanAdmin = admin.replace(/\./g, '');
-        const formattedAdmin = parseInt(cleanAdmin || '0').toLocaleString('id-ID')
-        setAdmin(formattedAdmin);
-        setTotalByr(parseInt(cleanAdmin) + num);
-        return;
-    },[admin])
+  const cleanAdmin = parseRupiah(admin);
+  setAdmin(cleanAdmin.toLocaleString('id-ID'));
+  setTotalByr(cleanAdmin + num);
+}, [admin]);
 
-    const handleOnSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
-      setTanggal(formatDate(new Date()));
-      setIsLoading(true);
-    
-      try {
-        const formData = new FormData(e.currentTarget);
-        const bank = formData.get('bank') as string;
-        const lokasi = formData.get('lokasi') as string;
-        const norek = formData.get('norek') as string;
-        const penerima = formData.get('penerima') as string;
-        const berita = (formData.get('berita') as string) || "GloryCell";
-        const totalbyr = formData.get('totalbyr') as string;
-        
-        const dataUser = { bank, norek, penerima };
-        const sanitizerBank = BankSeparator(bank);
-        
-        let saldoAwal = 0;
-        let saldoAkhir = 0;
-        
-        if (sanitizerBank === "DANAMON") {
-          const sisaFreeRef = ref(DB, 'Datas/SisaFree/ValueFreeDanamon');
-          const sisaSaldoDanamon = ref(DB, 'Datas/SaldoAwal/ValueDanamon');
-          const sisaFreeSnapshot = await get(sisaFreeRef);
-          const sisaFreeValue = sisaFreeSnapshot.val();
-          saldoAwal = (await get(sisaSaldoDanamon)).val();
-          
-          await runTransaction(sisaSaldoDanamon, (currentSaldo) => {
-            set(sisaFreeRef, sisaFreeValue - 1);
-            saldoAkhir = (currentSaldo || 0) - parseInt(nominal.replace(/\./g, ''))
-            return saldoAkhir;
-          });
-        }
-        
-        if (sanitizerBank === "BCA") {
-          const sisaSaldoBca = ref(DB, 'Datas/SaldoAwal/ValueBca');
-          saldoAwal = (await get(sisaSaldoBca)).val();
-          
-          await runTransaction(sisaSaldoBca, (currentSaldo) => {
-            saldoAkhir = (currentSaldo || 0) - parseInt(nominal.replace(/\./g, ''))
-            return currentSaldo - parseInt(nominal.replace(/\./g, ''));
-          });
-        }
-        
-        if (sanitizerBank === "BNI") {
-          const sisaSaldoBni = ref(DB, 'Datas/SaldoAwal/ValueBni');
-          saldoAwal = (await get(sisaSaldoBni)).val();
+const runSaldoTransaction = async (
+  bankKey: string,
+  nominal: number,
+  minSaldo: number = 20000
+): Promise<{ committed: boolean; saldoAwal: number; saldoAkhir: number }> => {
+  const saldoRef = ref(DB, `Datas/SaldoAwal/Value${capitalizeFirstLetter(bankKey)}`);
+  const saldoSnapshot = await get(saldoRef);
+  const saldoAwal = saldoSnapshot.val();
+  const saldoAkhir = saldoAwal - nominal;
 
-          await runTransaction(sisaSaldoBni, (currentSaldo) => {
-            saldoAkhir = (currentSaldo || 0) - parseInt(nominal.replace(/\./g, ''))
-            return saldoAkhir;
-          });
-        }
+  if(saldoAkhir <= minSaldo){
+    return { committed: false, saldoAwal, saldoAkhir };
+  }
 
-        if (sanitizerBank === "MANDIRI") {
-          const sisaSaldoMandiri = ref(DB, 'Datas/SaldoAwal/ValueMandiri');
-          saldoAwal = (await get(sisaSaldoMandiri)).val();
-          
-          await runTransaction(sisaSaldoMandiri, (currentSaldo) => {
-            saldoAkhir = (currentSaldo || 0) - parseInt(nominal.replace(/\./g, ''))
-            return saldoAkhir;
-          });
-        }
-    
-          if (sanitizerBank === "BRI") {
-          const sisaSaldoBri = ref(DB, 'Datas/SaldoAwal/ValueBri');
-          saldoAwal = (await get(sisaSaldoBri)).val();
+  const result = await runTransaction(saldoRef, (currentSaldo) => {
+    const data = (currentSaldo || 0 ) - nominal;
+    return data;
+  });
 
-          await runTransaction(sisaSaldoBri, (currentSaldo) => {
-            saldoAkhir = (currentSaldo || 0) - parseInt(nominal.replace(/\./g, ''))
-            return currentSaldo - parseInt(nominal.replace(/\./g, ''));
-          });
-        }
-        
-        const dataStruk = {
-          tanggal: tanggal.toString(),
-          lokasi,
-          bank,
-          norek,
-          penerima,
-          pengirim: "RAFI ANGGORO",
-          berita,
-          nominal,
-          admin,
-          totalbyr,
-          status: 'SUKSES',
-          saldoAwal,
-          saldoAkhir,
-        };
+  return { committed: result.committed, saldoAwal, saldoAkhir };
+};
 
+const showErrorSaldo = (bank: string, sisaSaldo: number) => {
+  Swal.fire({
+    icon: 'error',
+    title: `Saldo ${bank} tidak mencukupi`,
+    html: `Sisa Saldo <strong>Rp ${sisaSaldo ? sisaSaldo.toLocaleString("ID") : ""}</strong>.<br>Saldo tidak boleh kurang dari <strong>Rp 20.000</strong>.<br>Telpon Rafi buat top up saldo <strong>${bank}</strong>.`,
+  });
+};
+
+const handleBankTransaction = async (sanitizerBank: string, nominal: number) => {
+  const result = await runSaldoTransaction(sanitizerBank, nominal);
+  if (!result.committed) {
+    showErrorSaldo(sanitizerBank, result.saldoAwal);
+    return { isSaldoCukup: false, ...result };
+  }
+
+  // Khusus Danamon ada pengurangan sisa free
+  if (sanitizerBank === 'DANAMON') {
+    const sisaFreeRef = ref(DB, 'Datas/SisaFree/ValueFreeDanamon');
+    const sisaFreeSnapshot = await get(sisaFreeRef);
+    const sisaFreeValue = sisaFreeSnapshot.val();
+    await set(sisaFreeRef, sisaFreeValue - 1);
+  }
+
+  return { isSaldoCukup: true, ...result };
+};
+
+// 🧾 HANDLE FORM SUBMIT
+const handleOnSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+  setTanggal(formatDate(new Date()));
+  setIsLoading(true);
+
+  try {
+    const formData = new FormData(e.currentTarget);
+    const bank = formData.get('bank') as string;
+    const lokasi = formData.get('lokasi') as string;
+    const norek = formData.get('norek') as string;
+    const penerima = formData.get('penerima') as string;
+    const berita = (formData.get('berita') as string) || "GloryCell";
+    const totalbyr = formData.get('totalbyr') as string;
+
+    const nominalValue = parseRupiah(nominal);
+    const sanitizerBank = BankSeparator(bank);
+
+    if (!sanitizerBank) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Bank tidak valid',
+        text: 'Silakan pilih bank yang valid.',
+      });
+      return;
+    }
+    const { isSaldoCukup, saldoAwal, saldoAkhir } = await handleBankTransaction(sanitizerBank, nominalValue);
+
+    if (isSaldoCukup) {
+      const dataStruk = {
+        tanggal: tanggal.toString(),
+        lokasi,
+        bank,
+        norek,
+        penerima,
+        pengirim: "RAFI ANGGORO",
+        berita,
+        nominal,
+        admin,
+        totalbyr,
+        status: 'SUKSES',
+        saldoAwal,
+        saldoAkhir,
+      };
+
+      const dataUser = { bank, norek, penerima };
         const DataUsers = ref(DB, `Datas/UserInfo/`);
         const DataMutasi = ref(DB, `Mutasi/`);
     
         await Promise.all([push(DataMutasi, dataStruk), push(DataUsers, dataUser)]);
-    
-        sessionStorage.setItem('strukData', JSON.stringify(dataStruk));
-        router.push('/struk-transfer/cetak');
-      } catch (error) {
-        console.error("Error saat menyimpan data:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    const handleResetForm = () => {
-    location.reload();
+      sessionStorage.setItem('strukData', JSON.stringify(dataStruk));
+      router.push('/struk-transfer/cetak');
     }
+  } catch (error) {
+    console.error("Error saat menyimpan data:", error);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
-  useEffect(() => {
-    
-    const dateNow:Date = new Date();
-    setTanggal(formatDate(dateNow));
-    const cleanedNominal = parseInt(nominal.replace(/\./g, '') || '0');
-    calculation(cleanedNominal);
+// 🔄 Reset
+const handleResetForm = () => location.reload();
+
+// 🕒 Tanggal & Nominal Update
+useEffect(() => {
+  setTanggal(formatDate(new Date()));
+  calculation(parseRupiah(nominal));
 }, [calculation, nominal]);
+
 
   return (
     <div>
