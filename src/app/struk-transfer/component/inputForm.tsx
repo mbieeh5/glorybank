@@ -15,7 +15,7 @@ export default function InputForm() {
     const [penerima, setPenerima] = useState<string>('');
     const [admin, setAdmin] = useState<string>('0');
     const [totalByr, setTotalByr] = useState<number>(0);
-    const [tanggal, setTanggal] = useState<string>("")
+    const [tanggal , setTanggal] = useState<string>("")
     const [lokasi, setLokasi] = useState<string>('Cikaret');
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const router = useRouter();
@@ -49,7 +49,7 @@ const calculation = useCallback((num: number) => {
     { max: 10_000_000, fee: 25_000 },
   ];
 
-  for (let range of ranges) {
+  for (const range of ranges) {
     if (num <= range.max) {
       setAdmin(range.fee.toLocaleString('id-ID'));
       setTotalByr(range.fee + num);
@@ -140,7 +140,7 @@ const handleOnSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 
     if (isSaldoCukup) {
       const dataStruk = {
-        tanggal: formatDate(new Date()),
+        tanggal: tanggal.toString(),
         lokasi,
         bank,
         norek,
